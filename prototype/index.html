@@ -628,6 +628,8 @@ canvas.wr{border:.14em solid #111;border-radius:.8em;background:#fffdf2;touch-ac
 .cmtp .it .pg{border:0;background:none;padding:0;font:inherit;font-size:12px;font-weight:800;color:#1e56b8;text-align:left;cursor:pointer;text-decoration:underline}
 .cmtp .it .ip{font-size:12px;font-weight:700;color:#e8457a}.cmtp .it .tm{color:#9aa3b2;font-weight:400;margin-left:6px}
 .cmtp .it .io{white-space:pre-wrap;font-size:13px;margin:2px 0 3px;color:#1d2433}
+.cmtp .ctabs{display:flex;gap:4px;margin:2px 0 4px}.cmtp .ctabs button{flex:1;border:1px solid #cfd5df;background:#fff;border-radius:8px;padding:6px 4px;font:inherit;font-size:13px;font-weight:800;color:#5b6b8c;cursor:pointer}.cmtp .ctabs button.on{background:#1e56b8;border-color:#1e56b8;color:#fff}.cmtp .ctabs button.g.on{background:#7c3aed;border-color:#7c3aed}
+.cmtp .ginfo{font-size:12px;color:#5b21b6;background:#f5f3ff;border-radius:8px;padding:6px 9px;margin-top:6px;line-height:1.5}.cmtp .it .st{display:inline-block;font-size:11px;font-weight:800;border-radius:6px;padding:0 6px;margin-left:6px;background:#eef0f4;color:#374151}.cmtp .it .st.s1{background:#dcfce7;color:#166534}.cmtp .it .st.s2{background:#fee2e2;color:#991b1b}.cmtp .it .st.s3{background:#e0e7ff;color:#3730a3}.cmtp .it .mm{font-size:12px;color:#5b21b6;margin-bottom:3px}
 .cmtp .it .ed{border:1px solid #cfd5df;background:#fff;border-radius:99px;padding:1px 9px;font:inherit;font-size:12px;cursor:pointer}
 #cmtBtn.on{background:#e8457a;color:#fff;border-color:#e8457a}
 #askBtn.on{background:#6d28d9;color:#fff;border-color:#6d28d9}
@@ -1495,7 +1497,9 @@ function openComment(){ const p=$('#cmtp'); if(cmtOn()){ closeComment(); return;
   if(!p.firstChild){
     const sh=LESSON.comment&&LESSON.comment.sheet;
     p.innerHTML='<div class="hd"><h2>💬 검토 의견</h2>'+(sh?'<a class="shl" href="'+cesc(sh)+'" target="_blank" rel="noopener" title="기록된 의견을 구글 시트에서 봐요(보기 전용)">📄 시트 보기</a>':'')+'<button class="x" id="cmtX" title="닫기">✕</button></div>'
-      +'<label>차시</label><div class="ro" id="cmtLesson"></div><label>페이지</label><div class="ro" id="cmtPage"></div>'
+      +'<div class="ctabs" id="cmtTabs"><button type="button" data-m="page" class="on">🖥 이 화면 의견</button><button type="button" data-m="all" class="g">📚 전체 지침 의견</button></div>'
+      +'<div id="cmtWhere"><label>차시</label><div class="ro" id="cmtLesson"></div><label>페이지</label><div class="ro" id="cmtPage"></div></div>'
+      +'<div class="ginfo" id="gInfo" style="display:none">특정 차시가 아니라 <b>집필진 모두</b>에게 하는 의견이에요(예: 정의는 한 문장으로, 이런 낱말은 피하기). ‘전체 지침 의견’ 시트에 따로 기록되고, 대표 교사가 확정하면 모든 차시의 제작·수정에 반영돼요.</div>'
       +'<div id="cmtAuth"></div>'
       +'<div id="cmtForm"><div class="editing" id="cmtEditing"></div>'
       +'<label>부분</label><div class="parts" id="cmtParts">'+PARTS.map((x,k)=>'<button type="button" data-k="'+k+'"><span class="n">'+CIRC[k]+'</span><span>'+x[0]+'</span></button>').join('')+'</div>'
@@ -1503,11 +1507,18 @@ function openComment(){ const p=$('#cmtp'); if(cmtOn()){ closeComment(); return;
       +'<input id="cmtPart2" placeholder="자세한 위치(선택) 예: 두 번째 말풍선, 보기 3" style="margin-top:6px">'
       +'<label for="cmtText">의견</label><textarea id="cmtText" placeholder="이 화면에 대한 의견을 적어 주세요. 한 페이지에 여러 건을 남겨도 돼요. 칸을 연 채로 화면을 넘겨도 돼요."></textarea>'
       +'<div class="msg" id="cmtMsg"></div><div class="row2"><button class="sub" id="cmtCancel" style="display:none">고치기 그만</button><button id="cmtGo">기록하기</button></div></div>'
-      +'<div class="mine" id="cmtMine"></div>';
+      +'<div id="gForm" style="display:none"><div class="editing" id="gEditing"></div><label>분야</label><div class="parts" id="gAreas">'+GAREAS.map((x,k)=>'<button type="button" data-k="'+k+'"><span>'+x+'</span></button>').join('')+'</div>'
+      +'<label for="gLessons">관련 차시(선택)</label><input id="gLessons" placeholder="비워 두면 모든 차시. 예: 도형 단원, 8·12차시">'
+      +'<label for="gText">의견</label><textarea id="gText" placeholder="집필진 모두가 지켰으면 하는 점을 적어 주세요."></textarea>'
+      +'<div class="msg" id="gMsg"></div><div class="row2"><button class="sub" id="gCancel" style="display:none">고치기 그만</button><button id="gGo">기록하기</button></div></div>'
+      +'<div class="mine" id="cmtMine"></div><div class="mine" id="gMine" style="display:none"></div>';
     $('#cmtX').onclick=()=>closeComment();
     $('#cmtParts').onclick=e=>{ const b=e.target.closest('button'); if(b) pickPart(+b.dataset.k); };
     $('#cmtCancel').onclick=()=>cmtStopEdit();
     $('#cmtGo').onclick=cmtSave;
+    $('#cmtTabs').onclick=e=>{ const b=e.target.closest('button'); if(b) cmtMode(b.dataset.m); };
+    $('#gAreas').onclick=e=>{ const b=e.target.closest('button'); if(b){ garea=+b.dataset.k; gAreasDraw(); } }; gAreasDraw();
+    $('#gCancel').onclick=()=>gStopEdit(); $('#gGo').onclick=gSave;
   }
   p.classList.add('on'); document.body.classList.add('cmton'); $('#cmtBtn').classList.add('on'); $('#cmtMsg').textContent='';
   cmtAuthDraw(); if(fit()) render(); else cmtRefresh(); if(cauth.get()) cmtLoad(); }
@@ -1515,7 +1526,7 @@ function closeComment(keep){ $('#cmtp').classList.remove('on'); if(!keep) docume
 function pickPart(k){ cpart=k; cmtRefresh(); }
 // 로그인 칸: 이름 → (처음이면) 비밀번호 정하기 / (아니면) 비밀번호 넣기 → 로그인됨
 function cmtAuthDraw(){ const a=cauth.get(), box=$('#cmtAuth'), s=cstore.get();
-  $('#cmtForm').style.display=a?'':'none'; $('#cmtMine').style.display=a?'':'none';
+  cmtShow();
   if(a){ box.innerHTML='<div class="cwho">👤 <b>'+cesc(a.name)+'</b><button type="button" class="lnk2" id="cmtOut">다른 이름으로</button></div>'; $('#cmtOut').onclick=()=>{ cauth.set(null); citems=[]; cstep='name'; cmtStopEdit(); cmtAuthDraw(); }; if(innerWidth>900) setTimeout(()=>$('#cmtText').focus(),50); return; }
   const nm=cesc(s.name||'');
   if(cstep==='name') box.innerHTML='<label for="cmtName">이름(검토위원)</label><div class="r"><input id="cmtName" placeholder="예: 김○○ 교수" value="'+nm+'"><button id="cmtNext">다음</button></div><div class="msg" id="cmtAMsg"></div>';
@@ -1534,7 +1545,7 @@ function cmtAuthDraw(){ const a=cauth.get(), box=$('#cmtAuth'), s=cstore.get();
   $('#cmtNext').onclick=go; box.querySelectorAll('input').forEach(x=>x.onkeydown=e=>{ if(e.key==='Enter'&&!e.isComposing) go(); });
   setTimeout(()=>{ const f=box.querySelector('input[type=password]')||$('#cmtName'); if(f&&innerWidth>900) f.focus(); },50); }
 // 내가 이 차시에 남긴 의견을 서버에서 받아 온다
-async function cmtLoad(){ const a=cauth.get(); if(!a) return; $('#cmtMine').textContent='내 의견을 불러오는 중…';
+async function cmtLoad(){ const a=cauth.get(); if(!a) return; $('#cmtMine').textContent='내 의견을 불러오는 중…'; gLoad();
   try{ const j=await cmtApi({act:'list',name:a.name,pw:a.pw,lesson:LESSON.no+'차시 '+LESSON.title}); citems=j.items||[]; cmtListDraw(); }
   catch(e){ if(/비밀번호|등록되지/.test(e.message)){ cauth.set(null); cstep='pw'; cmtAuthDraw(); $('#cmtAMsg').className='msg no'; $('#cmtAMsg').textContent=e.message+'. 다시 넣어 주세요.'; } else $('#cmtMine').textContent='내 의견을 불러오지 못했어요('+e.message+').'; } }
 function cmtListDraw(){ const box=$('#cmtMine'); if(!box||!cauth.get()) return; const k=curKey();
@@ -1547,6 +1558,34 @@ function cmtListDraw(){ const box=$('#cmtMine'); if(!box||!cauth.get()) return; 
   box.innerHTML=h; $('#cmtAll').onclick=()=>{ call=!call; cmtListDraw(); };
   box.querySelectorAll('.ed').forEach(b=>b.onclick=()=>cmtStartEdit(b.dataset.id));
   box.querySelectorAll('.pg').forEach(b=>b.onclick=()=>{ const n=b.dataset.go.split('-').map(Number); if(n.length<2) return; mi=n[0]-1; si=n[1]-1; window.__cut=n[2]?n[2]-1:null; render(); }); }
+// ── 전체 지침 의견(집필진 모두에게): 이 화면 의견과 같은 이름·비밀번호를 쓴다 ──
+const GAREAS=['어휘 선정','낱말 뜻·설명','용례','활동 구성','지시문·말투','그림·영상','오개념','분량·흐름','화면 틀·기능','기타'];
+let cmode='page', garea=0, gitems=[], gedit=null;
+function cmtShow(){ const a=!!cauth.get(), g=cmode==='all';
+  $('#cmtWhere').style.display=g?'none':''; $('#gInfo').style.display=g?'':'none';
+  $('#cmtForm').style.display=a&&!g?'':'none'; $('#cmtMine').style.display=a&&!g?'':'none';
+  $('#gForm').style.display=a&&g?'':'none'; $('#gMine').style.display=a&&g?'':'none'; }
+function cmtMode(m){ cmode=m; [...$('#cmtTabs').children].forEach(b=>b.classList.toggle('on',b.dataset.m===m)); cmtShow(); cmtRefresh(); if(m==='all') gListDraw(); else cmtListDraw(); }
+function gAreasDraw(){ [...$('#gAreas').children].forEach((b,k)=>b.classList.toggle('on',k===garea)); }
+async function gLoad(){ const a=cauth.get(); if(!a) return; $('#gMine').textContent='내 의견을 불러오는 중…';
+  try{ const j=await cmtApi({act:'glist',name:a.name,pw:a.pw}); gitems=j.items||[]; gListDraw(); }catch(e){ $('#gMine').textContent='내 의견을 불러오지 못했어요('+e.message+').'; } }
+function gListDraw(){ const box=$('#gMine'); if(!box||!cauth.get()) return; const SC={'확정':'s1','보류':'s2','지침에 반영':'s3'};
+  let h='<div class="lh"><b>내가 남긴 전체 지침 의견 '+gitems.length+'건</b></div>'; if(!gitems.length) h+='<div class="hint">아직 남긴 의견이 없어요.</div>';
+  gitems.slice().reverse().forEach(it=>{ h+='<div class="it'+(gedit===it.id?' on':'')+'"><div class="ip">'+cesc(it.area)+(it.lessons?' · '+cesc(it.lessons):'')+'<span class="st '+(SC[it.state]||'')+'">'+cesc(it.state||'검토 중')+'</span><span class="tm">'+cesc(it.time)+(it.edited?' · 고침 '+cesc(it.edited):'')+'</span></div>'
+    +'<div class="io">'+cesc(it.opinion)+'</div>'+(it.memo?'<div class="mm">대표 교사: '+cesc(it.memo)+'</div>':'')+'<button type="button" class="ed" data-id="'+cesc(it.id)+'">✏️ 고치기</button></div>'; });
+  box.innerHTML=h; box.querySelectorAll('.ed').forEach(b=>b.onclick=()=>gStartEdit(b.dataset.id)); }
+function gStartEdit(id){ const it=gitems.find(x=>x.id===id); if(!it) return; gedit=id; const k=GAREAS.indexOf(it.area); garea=k<0?GAREAS.length-1:k; gAreasDraw();
+  $('#gLessons').value=it.lessons||''; $('#gText').value=it.opinion; $('#gGo').textContent='고친 내용 저장'; $('#gCancel').style.display='';
+  $('#gEditing').textContent='✏️ 전체 지침 의견을 고치는 중이에요'; $('#gEditing').style.display='block'; $('#gMsg').textContent=''; gListDraw(); $('#gText').focus(); }
+function gStopEdit(){ gedit=null; $('#gGo').textContent='기록하기'; $('#gCancel').style.display='none'; $('#gEditing').style.display='none'; $('#gText').value=''; $('#gLessons').value=''; gListDraw(); }
+async function gSave(){ const a=cauth.get(), text=$('#gText').value.trim(), msg=$('#gMsg'); if(!a) return; if(!text){ msg.className='msg no'; msg.textContent='의견을 적어 주세요.'; return; }
+  $('#gGo').disabled=true; msg.className='msg'; msg.textContent=gedit?'고치는 중…':'기록하는 중…';
+  try{ const b={name:a.name,pw:a.pw,area:GAREAS[garea],lessons:$('#gLessons').value.trim(),opinion:text};
+    if(gedit){ await cmtApi(Object.assign({act:'gedit',id:gedit},b)); msg.className='msg ok'; msg.textContent='고친 내용을 저장했어요.'; gStopEdit(); }
+    else { await cmtApi(Object.assign({act:'gadd'},b)); msg.className='msg ok'; msg.textContent='‘전체 지침 의견’ 시트에 기록했어요. 대표 교사가 확인한 뒤 반영해요.'; $('#gText').value=''; $('#gLessons').value=''; }
+    await gLoad(); }
+  catch(e){ msg.className='msg no'; msg.textContent=(e.message==='Failed to fetch'?'서버에 연결하지 못했어요':e.message)+'. 적은 글은 그대로 있어요. 다시 눌러 주세요.'; if(/비밀번호|등록되지/.test(e.message)){ cauth.set(null); cstep='pw'; cmtAuthDraw(); } }
+  $('#gGo').disabled=false; }
 function cmtStartEdit(id){ const it=citems.find(x=>x.id===id); if(!it) return; cedit=id;
   const k=CIRC.indexOf(String(it.part).charAt(0)); cpart=k<0?0:k; const d=String(it.part).split(' — '); $('#cmtPart2').value=d.length>1?d.slice(1).join(' — '):'';
   $('#cmtText').value=it.opinion; $('#cmtGo').textContent='고친 내용 저장'; $('#cmtCancel').style.display='';
@@ -1564,6 +1603,7 @@ async function cmtSave(){ const a=cauth.get(), text=$('#cmtText').value.trim(), 
   $('#cmtGo').disabled=false; }
 // 화면 위에 부분 상자와 번호를 그린다. 화면이 바뀌거나(영상 컷, 대화 펼침 포함) 크기가 바뀌면 다시 그린다.
 function cmtRefresh(){ if(!cmtOn()) return; const st=$('#stage'); if(!st) return;
+  if(cmode==='all'){ const o=$('#cmtov'); if(o) o.classList.remove('on'); return; }
   $('#cmtLesson').textContent=LESSON.no+'차시 '+LESSON.title; $('#cmtPage').textContent=pageLabel(); if(cmtRefresh.k!==curKey()){ cmtRefresh.k=curKey(); cmtListDraw(); }
   let ov=$('#cmtov'); if(!ov){ ov=el('div','notranslate'); ov.id='cmtov'; document.body.append(ov); ov.onclick=e=>{ const b=e.target.closest('.nb'); if(b) pickPart(+b.dataset.k); }; }
   const S=st.getBoundingClientRect(); Object.assign(ov.style,{left:S.left+'px',top:S.top+'px',width:S.width+'px',height:S.height+'px'}); ov.classList.add('on');
