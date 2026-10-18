@@ -1477,9 +1477,9 @@ const PARTS=[['화면 전체',''],['지시문','.qin,.askp .aq'],['낱말 뜻·�
   ['그림·영상 연출','.vod .board,.two .lf,.tkboard,.gdav,.tkav,.vod .who,.ckguide .gdav'],['대사·내레이션','.vod .bub,.vod .capt:not(.none),.gdb,.ckguide>div:last-child'],
   ['활동(보기·정답)','.opts,.chips,.askp .ar,.ox,.lt,.so,.pzs,.lc,.ck'],['쓰기·말하기','canvas.wr,.ghostword,.say.tp,.say.col,.rec'],['오개념',''],['기타','']];
 const CIRC='①②③④⑤⑥⑦⑧⑨⑩';
-// 검토위원 확인: 이름으로 처음 기록할 때 비밀번호를 정하고, 다음부터는 비밀번호가 맞아야 기록·고치기를 한다.
+// 검토위원 확인: 이름으로 처음 기록할 때 비밀번호를 정하고, 다음부터는 비밀번호가 맞아야 기록·고치기를 한다. 모든 차시가 같은 서버라 비밀번호도 모든 차시에서 같다.
 //  이름은 이 기기에 기억하고, 비밀번호는 브라우저를 닫을 때까지만(sessionStorage) 기억한다.
-const cauth={ get(){ try{ return JSON.parse(sessionStorage.getItem(CKEY+':auth')||'null'); }catch(e){ return null; } }, set(v){ try{ v?sessionStorage.setItem(CKEY+':auth',JSON.stringify(v)):sessionStorage.removeItem(CKEY+':auth'); }catch(e){} } };
+const cauth={ get(){ try{ return JSON.parse(sessionStorage.getItem('vocabcmt:auth')||'null'); }catch(e){ return null; } }, set(v){ try{ v?sessionStorage.setItem('vocabcmt:auth',JSON.stringify(v)):sessionStorage.removeItem('vocabcmt:auth'); }catch(e){} } };
 let cpart=0, citems=[], cedit=null, call=false, cstep='name';
 async function cmtApi(b){ const url=LESSON.comment&&LESSON.comment.url; if(!url) throw new Error('기록 주소 없음');
   const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(b)}); const j=await r.json(); if(!j.ok) throw new Error(j.error||'기록 실패'); return j; }
