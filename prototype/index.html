@@ -71,6 +71,7 @@ const LESSON_SPEC = () => ({
   keep: ['분해', '거듭', '제곱'],
   guide_name: '안내',
   ask_url: 'https://script.google.com/macros/s/AKfycbwB6R5cWqCF7lY8wBxwsEtu45AKvTrceFa9mjPvFSCPKfHWmh8NpN10yzFiXTdPrbiL/exec',   // 지침 도우미(집필진·검토위원용 AI 질문) 서버 주소 — 접속 암호가 있어야 답한다
+  comment_sheet: 'https://docs.google.com/spreadsheets/d/1eIOEVhjYTogAEFeZJe3kG7yS8dbNx2yjwDJeqonQEyk/edit?usp=sharing',   // 검토 의견 시트(보기 전용 링크) — 검토 의견 칸의 ‘📄 시트 보기’ 단추
   comment_url: 'https://script.google.com/macros/s/AKfycbyyVQ9bYSSTL5T0yYCiYR_xMSjfuE04w0ZHRJoC4DZLVoZPCOn9E2EVxwMrGGSf3OZlew/exec',   // 검토 의견을 기록할 구글 시트(Apps Script) 주소
 
   // ── 1. 들어가기 ─────────────────────────────────────────────
@@ -599,6 +600,7 @@ canvas.wr{border:.14em solid #111;border-radius:.8em;background:#fffdf2;touch-ac
 .say.core{background:#fff8d9}
 .cmtp{width:320px;flex:none;align-self:stretch;display:none;flex-direction:column;background:#fff;border:1px solid #cfd6e4;border-radius:12px;overflow:auto;padding:12px 14px 12px;font-size:13.5px;line-height:1.5;color:#1d2433;box-shadow:0 2px 10px rgba(0,0,0,.08)}
 .cmtp.on{display:flex}
+.cmtp:not(.ask)>*{flex:none}
 .cmtp .hd{display:flex;align-items:center;gap:6px;margin-bottom:4px}.cmtp h2{flex:1;margin:0;font-size:16px;color:#1e56b8}
 .cmtp .x{border:0;background:#e9ecf1;border-radius:99px;width:28px;height:28px;font-size:15px;font-weight:800;cursor:pointer}
 .cmtp label{display:block;font-weight:800;font-size:12.5px;margin:9px 0 3px;color:#374151}
@@ -614,7 +616,19 @@ canvas.wr{border:.14em solid #111;border-radius:.8em;background:#fffdf2;touch-ac
 .cmtp .row2{display:flex;justify-content:flex-end;margin-top:10px}
 .cmtp .row2 button{border:0;border-radius:99px;padding:8px 20px;font:inherit;font-weight:800;background:#1e56b8;color:#fff;cursor:pointer}.cmtp .row2 button:disabled{opacity:.5}
 .cmtp .msg{min-height:1.3em;font-weight:800;margin-top:6px;font-size:13px}.cmtp .msg.ok{color:#0a8f5b}.cmtp .msg.no{color:#d23a3a}
-.cmtp .mine{margin-top:8px;font-size:12px;color:#5b6b8c;border-top:1px dashed #cfd6e4;padding-top:7px}
+.cmtp .mine{margin-top:10px;font-size:12.5px;color:#374151;border-top:1px dashed #cfd6e4;padding-top:8px}
+.cmtp .r{display:flex;gap:6px}.cmtp .r button,.cmtp .r+.r button{border:0;border-radius:99px;padding:6px 14px;font:inherit;font-weight:800;background:#1e56b8;color:#fff;cursor:pointer;white-space:nowrap}.cmtp .r button:disabled{opacity:.5}
+.cmtp .cwho{display:flex;align-items:center;gap:8px;margin-top:9px;background:#eef3ff;border-radius:8px;padding:5px 9px}.cmtp .cwho b{flex:1}
+.cmtp .lnk2{border:0;background:none;color:#1e56b8;font:inherit;font-size:12px;font-weight:700;text-decoration:underline;cursor:pointer;padding:0}
+.cmtp .shl{font-size:12.5px;font-weight:800;color:#0a7a46;background:#e6f6ec;border-radius:99px;padding:4px 10px;text-decoration:none;white-space:nowrap}
+.cmtp .editing{display:none;margin-top:9px;background:#fff7e0;border:1px solid #f5d27a;border-radius:8px;padding:5px 9px;font-size:12.5px;font-weight:700;color:#8a5a00}
+.cmtp .row2 button.sub{background:#e9ecf1;color:#1d2433;margin-right:6px}
+.cmtp .lh{display:flex;align-items:center;gap:8px;margin-bottom:5px}.cmtp .lh b{flex:1}
+.cmtp .it{border:1px solid #e3e7ee;border-radius:8px;padding:6px 8px;margin-top:5px;background:#fafbfd}.cmtp .it.on{border-color:#f5b400;background:#fff7e0}
+.cmtp .it .pg{border:0;background:none;padding:0;font:inherit;font-size:12px;font-weight:800;color:#1e56b8;text-align:left;cursor:pointer;text-decoration:underline}
+.cmtp .it .ip{font-size:12px;font-weight:700;color:#e8457a}.cmtp .it .tm{color:#9aa3b2;font-weight:400;margin-left:6px}
+.cmtp .it .io{white-space:pre-wrap;font-size:13px;margin:2px 0 3px;color:#1d2433}
+.cmtp .it .ed{border:1px solid #cfd5df;background:#fff;border-radius:99px;padding:1px 9px;font:inherit;font-size:12px;cursor:pointer}
 #cmtBtn.on{background:#e8457a;color:#fff;border-color:#e8457a}
 #askBtn.on{background:#6d28d9;color:#fff;border-color:#6d28d9}
 .cmtp.ask{overflow:hidden;padding-bottom:10px}.cmtp.ask h2{color:#6d28d9}
@@ -861,7 +875,7 @@ const KIT=(function(){
     if((p.colloc||[]).length) vocab['공기관계어']=p.colloc;
     const keep=[...new Set(nw.concat(aux,pre.map(x=>x[0]),p.keep||[]).filter(w=>w.length>=2||nw.includes(w)))].sort((a,b)=>b.length-a.length||(a<b?-1:a>b?1:0));
     const A=String(row.std||'').split('\n'), B=String(row.std_text||'').split('\n');
-    const L={flow:'1016',tries:3,tips:null,chat:null,comment:p.comment_url?{url:p.comment_url}:{url:''},ask:p.ask_url?{url:p.ask_url}:null,code:'L'+String(no).padStart(2,'0'),no:no,title:p.title||row.title,grade:GRADE[row.grade]||'',
+    const L={flow:'1016',tries:3,tips:null,chat:null,comment:{url:p.comment_url||'',sheet:p.comment_sheet||''},ask:p.ask_url?{url:p.ask_url}:null,code:'L'+String(no).padStart(2,'0'),no:no,title:p.title||row.title,grade:GRADE[row.grade]||'',
       standard:p.std||A.map((a,i)=>a+' '+(B[i]||'')).join(' / '),unit:p.unit,lessonType:'개념 중심 차시 (10분 안팎) · 학습 어휘 '+nw.length+'개'+(pre.length?', 미리 확인할 말 '+pre.length+'개':''),
       words:nw,keep:keep,cast:CAST,guide:p.guide_name||'안내 캐릭터',vocab:vocab,modules:M};
     L.meta={}; ['author','status','updated'].forEach(k=>{ if(k in p) L.meta[k]=p[k]; });
@@ -1457,47 +1471,100 @@ function voices(sc,cut){ const v=[]; if(sc.q) v.push(['낭독',sc.q,3]);
 // ── 검토 의견: 지금 화면에 대한 의견을 구글 시트(차시 / 페이지 / 부분 / 외부검토위원의견 …)에 한 줄로 남긴다 ──
 const CKEY='vocabcmt:'+(LESSON.code||'');
 const cstore={ get(){ try{ return JSON.parse(localStorage.getItem(CKEY)||'{}')||{}; }catch(e){ return {}; } }, set(v){ try{ localStorage.setItem(CKEY,JSON.stringify(v)); }catch(e){} } };
-function pageLabel(){ const mod=LESSON.modules[mi], sc=mod.screens[si]; let t=(mi+1)+'-'+(si+1)+' '+mod.name+' · '+(sc.book?'교과서 문장 읽기':(TYPE_KO[sc.type]||sc.type)); const tg=$('#stage .tag'); if(sc.type==='vod'&&tg) t+=' · '+tg.textContent.replace(/^영상 대본 · /,''); return t; }
+function pageLabel(){ const mod=LESSON.modules[mi], sc=mod.screens[si]; let t=(mi+1)+'-'+(si+1)+' '+mod.name+' · '+(sc.book?'교과서 문장 읽기':(TYPE_KO[sc.type]||sc.type)); const tg=$('#stage .tag'); if(sc.type==='vod'&&tg){ const m=tg.textContent.match(/컷 (\d+)\/(\d+)/); if(m) t+=' · '+m[1]+'번째 컷(전체 '+m[2]+'컷)'; } return t; }
 // 부분: 번호(원 문자)는 모든 화면에서 같다. 화면 위의 어느 요소가 어느 부분인지는 sel(선택자)로 찾아 상자와 번호를 붙인다.
 const PARTS=[['화면 전체',''],['지시문','.qin,.askp .aq'],['낱말 뜻·설명','.card,.motion,.gdchips,.rc .cd,.cur,.ck .ex'],['용례(문장·대화)','.tkb,.say:not(.tp):not(.col),.sent,.sp'],
   ['그림·영상 연출','.vod .board,.two .lf,.tkboard,.gdav,.tkav,.vod .who,.ckguide .gdav'],['대사·내레이션','.vod .bub,.vod .capt:not(.none),.gdb,.ckguide>div:last-child'],
   ['활동(보기·정답)','.opts,.chips,.askp .ar,.ox,.lt,.so,.pzs,.lc,.ck'],['쓰기·말하기','canvas.wr,.ghostword,.say.tp,.say.col,.rec'],['오개념',''],['기타','']];
 const CIRC='①②③④⑤⑥⑦⑧⑨⑩';
-async function postComment(row){ const url=LESSON.comment&&LESSON.comment.url; if(!url) throw new Error('기록 주소 없음');
-  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(row)}); const j=await r.json(); if(!j.ok) throw new Error(j.error||'기록 실패'); return j; }
-async function flushPending(){ const s=cstore.get(); const p=s.pending||[]; if(!p.length) return 0; const left=[]; let n=0;
-  for(const row of p){ try{ await postComment(row); n++; (s.sent=s.sent||[]).push(row); }catch(e){ left.push(row); } } s.pending=left; cstore.set(s); return n; }
-let cpart=0;
+// 검토위원 확인: 이름으로 처음 기록할 때 비밀번호를 정하고, 다음부터는 비밀번호가 맞아야 기록·고치기를 한다.
+//  이름은 이 기기에 기억하고, 비밀번호는 브라우저를 닫을 때까지만(sessionStorage) 기억한다.
+const cauth={ get(){ try{ return JSON.parse(sessionStorage.getItem(CKEY+':auth')||'null'); }catch(e){ return null; } }, set(v){ try{ v?sessionStorage.setItem(CKEY+':auth',JSON.stringify(v)):sessionStorage.removeItem(CKEY+':auth'); }catch(e){} } };
+let cpart=0, citems=[], cedit=null, call=false, cstep='name';
+async function cmtApi(b){ const url=LESSON.comment&&LESSON.comment.url; if(!url) throw new Error('기록 주소 없음');
+  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(b)}); const j=await r.json(); if(!j.ok) throw new Error(j.error||'기록 실패'); return j; }
+const cesc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// 지금 화면의 자리: 영상(대본)은 컷 번호까지(예: 3-1-2)
+function curCut(){ const tg=$('#stage .tag'), m=tg&&tg.textContent.match(/컷 (\d+)\//); return m?+m[1]:0; }
+function curKey(){ const c=LESSON.modules[mi].screens[si].type==='vod'?curCut():0; return (mi+1)+'-'+(si+1)+(c?'-'+c:''); }
+// 시트에 적을 화면 주소: 공개 주소는 그대로, 내 컴퓨터 파일은 파일 이름만(긴 경로가 잘리지 않게)
+function cmtUrl(){ const base=location.protocol==='file:'?'file:'+decodeURIComponent(location.pathname.split('/').pop()):location.href.split('#')[0]; return base+'#'+curKey(); }
+function keyOf(url){ const m=String(url||'').match(/#(\d+-\d+(?:-\d+)?)m?$/); return m?m[1]:''; }
 function cmtOn(){ return $('#cmtp').classList.contains('on'); }
 function openComment(){ const p=$('#cmtp'); if(cmtOn()){ closeComment(); return; } closeAsk(true);
-  if(!p.firstChild){ const s=cstore.get();
-    p.innerHTML='<div class="hd"><h2>💬 검토 의견 남기기</h2><button class="x" id="cmtX" title="닫기">✕</button></div>'
+  if(!p.firstChild){
+    const sh=LESSON.comment&&LESSON.comment.sheet;
+    p.innerHTML='<div class="hd"><h2>💬 검토 의견</h2>'+(sh?'<a class="shl" href="'+cesc(sh)+'" target="_blank" rel="noopener" title="기록된 의견을 구글 시트에서 봐요(보기 전용)">📄 시트 보기</a>':'')+'<button class="x" id="cmtX" title="닫기">✕</button></div>'
       +'<label>차시</label><div class="ro" id="cmtLesson"></div><label>페이지</label><div class="ro" id="cmtPage"></div>'
+      +'<div id="cmtAuth"></div>'
+      +'<div id="cmtForm"><div class="editing" id="cmtEditing"></div>'
       +'<label>부분</label><div class="parts" id="cmtParts">'+PARTS.map((x,k)=>'<button type="button" data-k="'+k+'"><span class="n">'+CIRC[k]+'</span><span>'+x[0]+'</span></button>').join('')+'</div>'
       +'<div class="hint">화면에 표시된 번호를 눌러도 골라져요. 진한 칸은 지금 화면에 있는 부분이에요.</div>'
       +'<input id="cmtPart2" placeholder="자세한 위치(선택) 예: 두 번째 말풍선, 보기 3" style="margin-top:6px">'
-      +'<label for="cmtText">의견</label><textarea id="cmtText" placeholder="이 화면에 대한 의견을 적어 주세요. 칸을 연 채로 화면을 넘겨도 돼요."></textarea>'
-      +'<label for="cmtName">이름(검토위원)</label><input id="cmtName" placeholder="예: 김○○ 교수" value="'+String(s.name||'').replace(/"/g,'&quot;')+'">'
-      +'<div class="msg" id="cmtMsg"></div><div class="row2"><button id="cmtGo">기록하기</button></div><div class="mine" id="cmtMine"></div>';
-    $('#cmtX').onclick=closeComment;
+      +'<label for="cmtText">의견</label><textarea id="cmtText" placeholder="이 화면에 대한 의견을 적어 주세요. 한 페이지에 여러 건을 남겨도 돼요. 칸을 연 채로 화면을 넘겨도 돼요."></textarea>'
+      +'<div class="msg" id="cmtMsg"></div><div class="row2"><button class="sub" id="cmtCancel" style="display:none">고치기 그만</button><button id="cmtGo">기록하기</button></div></div>'
+      +'<div class="mine" id="cmtMine"></div>';
+    $('#cmtX').onclick=()=>closeComment();
     $('#cmtParts').onclick=e=>{ const b=e.target.closest('button'); if(b) pickPart(+b.dataset.k); };
-    $('#cmtGo').onclick=async()=>{ const text=$('#cmtText').value.trim(), msg=$('#cmtMsg'); if(!text){ msg.className='msg no'; msg.textContent='의견을 적어 주세요.'; return; }
-      const name=$('#cmtName').value.trim(); const v=cstore.get(); v.name=name; cstore.set(v);
-      const part=CIRC[cpart]+' '+PARTS[cpart][0]+($('#cmtPart2').value.trim()?' — '+$('#cmtPart2').value.trim():'');
-      const row={lesson:LESSON.no+'차시 '+LESSON.title,page:pageLabel(),part:part,opinion:text,name:name,url:location.href.split('#')[0]+'#'+(mi+1)+'-'+(si+1),code:LESSON.code};
-      $('#cmtGo').disabled=true; msg.className='msg'; msg.textContent='기록하는 중…';
-      try{ await postComment(row); const w=cstore.get(); (w.sent=w.sent||[]).push(row); cstore.set(w); msg.className='msg ok'; msg.textContent='구글 시트에 기록했어요. 고맙습니다!'; $('#cmtText').value=''; $('#cmtPart2').value=''; flushPending().then(cmtMine); }
-      catch(e){ const w=cstore.get(); (w.pending=w.pending||[]).push(row); cstore.set(w); msg.className='msg no'; msg.textContent='지금은 기록하지 못했어요('+e.message+'). 이 기기에 적어 두었다가 다음에 다시 보내요.'; }
-      $('#cmtGo').disabled=false; cmtMine(); };
+    $('#cmtCancel').onclick=()=>cmtStopEdit();
+    $('#cmtGo').onclick=cmtSave;
   }
   p.classList.add('on'); document.body.classList.add('cmton'); $('#cmtBtn').classList.add('on'); $('#cmtMsg').textContent='';
-  if(fit()) render(); else cmtRefresh(); cmtMine(); if(innerWidth>900) setTimeout(()=>$('#cmtText').focus(),50); }
+  cmtAuthDraw(); if(fit()) render(); else cmtRefresh(); if(cauth.get()) cmtLoad(); }
 function closeComment(keep){ $('#cmtp').classList.remove('on'); if(!keep) document.body.classList.remove('cmton'); $('#cmtBtn').classList.remove('on'); $('#cmtov')&&$('#cmtov').classList.remove('on'); if(!keep&&fit()) render(); }
-function cmtMine(){ const v=cstore.get(); const a=(v.sent||[]).length, p=(v.pending||[]).length; $('#cmtMine').textContent='이 기기에서 남긴 의견: 기록됨 '+a+'개'+(p?' · 아직 못 보냄 '+p+'개(다음에 다시 보내요)':''); }
 function pickPart(k){ cpart=k; cmtRefresh(); }
+// 로그인 칸: 이름 → (처음이면) 비밀번호 정하기 / (아니면) 비밀번호 넣기 → 로그인됨
+function cmtAuthDraw(){ const a=cauth.get(), box=$('#cmtAuth'), s=cstore.get();
+  $('#cmtForm').style.display=a?'':'none'; $('#cmtMine').style.display=a?'':'none';
+  if(a){ box.innerHTML='<div class="cwho">👤 <b>'+cesc(a.name)+'</b><button type="button" class="lnk2" id="cmtOut">다른 이름으로</button></div>'; $('#cmtOut').onclick=()=>{ cauth.set(null); citems=[]; cstep='name'; cmtStopEdit(); cmtAuthDraw(); }; if(innerWidth>900) setTimeout(()=>$('#cmtText').focus(),50); return; }
+  const nm=cesc(s.name||'');
+  if(cstep==='name') box.innerHTML='<label for="cmtName">이름(검토위원)</label><div class="r"><input id="cmtName" placeholder="예: 김○○ 교수" value="'+nm+'"><button id="cmtNext">다음</button></div><div class="msg" id="cmtAMsg"></div>';
+  else if(cstep==='new') box.innerHTML='<div class="cwho">👤 <b>'+nm+'</b><button type="button" class="lnk2" id="cmtBack">이름 바꾸기</button></div><div class="hint" style="margin-top:6px">처음 오셨어요. 앞으로 의견을 기록하고 고칠 때 쓸 <b>비밀번호를 정해</b> 주세요(4자 이상).</div><input id="cmtPw" type="password" placeholder="비밀번호" autocomplete="new-password" style="margin-top:6px"><input id="cmtPw2" type="password" placeholder="비밀번호 한 번 더" autocomplete="new-password" style="margin-top:6px"><div class="r" style="margin-top:6px;justify-content:flex-end"><button id="cmtNext">정하고 시작</button></div><div class="msg" id="cmtAMsg"></div>';
+  else box.innerHTML='<div class="cwho">👤 <b>'+nm+'</b><button type="button" class="lnk2" id="cmtBack">이름 바꾸기</button></div><label for="cmtPw">비밀번호</label><div class="r"><input id="cmtPw" type="password" placeholder="처음에 정한 비밀번호" autocomplete="current-password"><button id="cmtNext">확인</button></div><div class="msg" id="cmtAMsg"></div>';
+  const back=$('#cmtBack'); if(back) back.onclick=()=>{ cstep='name'; cmtAuthDraw(); };
+  const go=async()=>{ const m=$('#cmtAMsg'), bt=$('#cmtNext'); m.className='msg';
+    try{ bt.disabled=true;
+      if(cstep==='name'){ const name=$('#cmtName').value.replace(/\s+/g,' ').trim(); if(!name){ m.className='msg no'; m.textContent='이름을 적어 주세요.'; return; }
+        m.textContent='확인하는 중…'; const j=await cmtApi({act:'who',name}); const v=cstore.get(); v.name=name; cstore.set(v); cstep=j.exists?'pw':'new'; cmtAuthDraw(); return; }
+      const pw=$('#cmtPw').value; if(pw.length<4){ m.className='msg no'; m.textContent='비밀번호는 4자 이상이에요.'; return; }
+      if(cstep==='new'&&pw!==$('#cmtPw2').value){ m.className='msg no'; m.textContent='두 비밀번호가 달라요.'; return; }
+      m.textContent='확인하는 중…'; const j=await cmtApi({act:'login',name:s.name,pw}); cauth.set({name:j.name,pw}); cmtAuthDraw(); cmtLoad(); }
+    catch(e){ m.className='msg no'; m.textContent=e.message==='Failed to fetch'?'서버에 연결하지 못했어요.':e.message+'.'; }
+    finally{ const b=$('#cmtNext'); if(b) b.disabled=false; } };
+  $('#cmtNext').onclick=go; box.querySelectorAll('input').forEach(x=>x.onkeydown=e=>{ if(e.key==='Enter'&&!e.isComposing) go(); });
+  setTimeout(()=>{ const f=box.querySelector('input[type=password]')||$('#cmtName'); if(f&&innerWidth>900) f.focus(); },50); }
+// 내가 이 차시에 남긴 의견을 서버에서 받아 온다
+async function cmtLoad(){ const a=cauth.get(); if(!a) return; $('#cmtMine').textContent='내 의견을 불러오는 중…';
+  try{ const j=await cmtApi({act:'list',name:a.name,pw:a.pw,lesson:LESSON.no+'차시 '+LESSON.title}); citems=j.items||[]; cmtListDraw(); }
+  catch(e){ if(/비밀번호|등록되지/.test(e.message)){ cauth.set(null); cstep='pw'; cmtAuthDraw(); $('#cmtAMsg').className='msg no'; $('#cmtAMsg').textContent=e.message+'. 다시 넣어 주세요.'; } else $('#cmtMine').textContent='내 의견을 불러오지 못했어요('+e.message+').'; } }
+function cmtListDraw(){ const box=$('#cmtMine'); if(!box||!cauth.get()) return; const k=curKey();
+  const here=citems.filter(it=>keyOf(it.url)===k), list=call?citems:here;
+  let h='<div class="lh"><b>'+(call?'이 차시에 남긴 내 의견 '+citems.length+'건':'이 페이지에 남긴 내 의견 '+here.length+'건')+'</b><button type="button" class="lnk2" id="cmtAll">'+(call?'이 페이지만 보기':'차시 전체 '+citems.length+'건 보기')+'</button></div>';
+  if(!list.length) h+='<div class="hint">'+(call?'아직 남긴 의견이 없어요.':'이 페이지에는 아직 남긴 의견이 없어요.')+'</div>';
+  list.slice().reverse().forEach(it=>{ h+='<div class="it'+(cedit===it.id?' on':'')+'">'+(call?'<button type="button" class="pg" data-go="'+cesc(keyOf(it.url))+'">'+cesc(it.page)+'</button>':'')
+    +'<div class="ip">'+cesc(it.part)+'<span class="tm">'+cesc(it.time)+(it.edited?' · 고침 '+cesc(it.edited):'')+'</span></div><div class="io">'+cesc(it.opinion)+'</div>'
+    +'<button type="button" class="ed" data-id="'+cesc(it.id)+'">✏️ 고치기</button></div>'; });
+  box.innerHTML=h; $('#cmtAll').onclick=()=>{ call=!call; cmtListDraw(); };
+  box.querySelectorAll('.ed').forEach(b=>b.onclick=()=>cmtStartEdit(b.dataset.id));
+  box.querySelectorAll('.pg').forEach(b=>b.onclick=()=>{ const n=b.dataset.go.split('-').map(Number); if(n.length<2) return; mi=n[0]-1; si=n[1]-1; window.__cut=n[2]?n[2]-1:null; render(); }); }
+function cmtStartEdit(id){ const it=citems.find(x=>x.id===id); if(!it) return; cedit=id;
+  const k=CIRC.indexOf(String(it.part).charAt(0)); cpart=k<0?0:k; const d=String(it.part).split(' — '); $('#cmtPart2').value=d.length>1?d.slice(1).join(' — '):'';
+  $('#cmtText').value=it.opinion; $('#cmtGo').textContent='고친 내용 저장'; $('#cmtCancel').style.display='';
+  $('#cmtEditing').innerHTML='✏️ 의견을 고치는 중이에요 — '+cesc(it.page); $('#cmtEditing').style.display='block'; $('#cmtMsg').textContent='';
+  cmtRefresh(); cmtListDraw(); $('#cmtText').focus(); }
+function cmtStopEdit(){ cedit=null; if(!$('#cmtGo')) return; $('#cmtGo').textContent='기록하기'; $('#cmtCancel').style.display='none'; $('#cmtEditing').style.display='none'; $('#cmtText').value=''; $('#cmtPart2').value=''; cmtListDraw(); }
+async function cmtSave(){ const a=cauth.get(), text=$('#cmtText').value.trim(), msg=$('#cmtMsg'); if(!a) return; if(!text){ msg.className='msg no'; msg.textContent='의견을 적어 주세요.'; return; }
+  const part=CIRC[cpart]+' '+PARTS[cpart][0]+($('#cmtPart2').value.trim()?' — '+$('#cmtPart2').value.trim():'');
+  $('#cmtGo').disabled=true; msg.className='msg'; msg.textContent=cedit?'고치는 중…':'기록하는 중…';
+  try{ if(cedit){ await cmtApi({act:'edit',name:a.name,pw:a.pw,id:cedit,part,opinion:text}); msg.className='msg ok'; msg.textContent='고친 내용을 시트에 저장했어요.'; cedit=null; cmtStopEdit(); }
+    else { await cmtApi({act:'add',name:a.name,pw:a.pw,lesson:LESSON.no+'차시 '+LESSON.title,page:pageLabel(),part,opinion:text,url:cmtUrl(),code:LESSON.code});
+      msg.className='msg ok'; msg.textContent='구글 시트에 기록했어요. 이 페이지에 의견을 더 남겨도 돼요.'; $('#cmtText').value=''; $('#cmtPart2').value=''; }
+    await cmtLoad(); }
+  catch(e){ msg.className='msg no'; msg.textContent=(e.message==='Failed to fetch'?'서버에 연결하지 못했어요':e.message)+'. 적은 글은 그대로 있어요. 다시 눌러 주세요.'; if(/비밀번호|등록되지/.test(e.message)){ cauth.set(null); cstep='pw'; cmtAuthDraw(); } }
+  $('#cmtGo').disabled=false; }
 // 화면 위에 부분 상자와 번호를 그린다. 화면이 바뀌거나(영상 컷, 대화 펼침 포함) 크기가 바뀌면 다시 그린다.
 function cmtRefresh(){ if(!cmtOn()) return; const st=$('#stage'); if(!st) return;
-  $('#cmtLesson').textContent=LESSON.no+'차시 '+LESSON.title; $('#cmtPage').textContent=pageLabel();
+  $('#cmtLesson').textContent=LESSON.no+'차시 '+LESSON.title; $('#cmtPage').textContent=pageLabel(); if(cmtRefresh.k!==curKey()){ cmtRefresh.k=curKey(); cmtListDraw(); }
   let ov=$('#cmtov'); if(!ov){ ov=el('div','notranslate'); ov.id='cmtov'; document.body.append(ov); ov.onclick=e=>{ const b=e.target.closest('.nb'); if(b) pickPart(+b.dataset.k); }; }
   const S=st.getBoundingClientRect(); Object.assign(ov.style,{left:S.left+'px',top:S.top+'px',width:S.width+'px',height:S.height+'px'}); ov.classList.add('on');
   // 스크롤되는 칸(대화창 등) 밖으로 나간 부분은 잘라서 보이는 만큼만 표시한다
@@ -1599,7 +1666,7 @@ function init(){
   $('#prevMod').onclick=()=>{ if(mi>0){mi--;si=0;render();} }; $('#nextMod').onclick=()=>{ if(mi<LESSON.modules.length-1){mi++;si=0;render();} };
   initChat(); progInit();
   { const rb=$('#resetBtn'); let arm=0; rb.onclick=()=>{ if(!arm){ arm=1; rb.textContent='한 번 더 누르면 지워요'; setTimeout(()=>{ arm=0; rb.innerHTML='↺<span> 기록 지우기</span>'; },3000); return; } arm=0; prog.clear(); rb.innerHTML='↺<span> 기록 지우기</span>'; render(); }; }
-  $('#cmtBtn').onclick=openComment; flushPending();
+  $('#cmtBtn').onclick=openComment;
   if(LESSON.ask&&LESSON.ask.url){ $('#askBtn').style.display=''; $('#askBtn').onclick=openAsk; }
   $('#memoBtn').onclick=()=>{ memoOn=!memoOn; $('#memo').classList.toggle('on',memoOn); $('#memoBtn').classList.toggle('on',memoOn); render(); };
   const hc=location.hash.match(/#\d+-\d+-(\d+)/); if(hc) window.__cut=hc[1]-1;
