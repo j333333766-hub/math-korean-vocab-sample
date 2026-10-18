@@ -25,7 +25,7 @@ function svg(markup,w,h){ return {kind:'svg',svg:markup,w:w||420,h:h||320}; }
 function cut(cap,o){ if(cap&&typeof cap==='object'){ o=cap; cap=null; } o=o||{}; const c={};
   if(o.fig!=null) c.fig=o.fig; if(o.text!=null) c.text=o.text;
   if(cap){ c.caption=cap; c.narr=o.narr||KIT_PRE.plain(cap); }
-  if(o.dir) c.dir=o.dir;
+  if(o.dir) c.dir=o.dir; if(o.at!=null) c.at=o.at;   // at: 영상(video)이 있을 때 이 컷이 시작하는 초
   if(o.b) c.bubbles=o.b.map(x=>({who:x[0],text:x[1]}));
   return c; }
 function card(front,a,b){ let back;
@@ -87,23 +87,22 @@ const LESSON_SPEC = () => ({
   // 인물 번호 0 아미르, 1 유나(임시 인물 — 업체가 중학교용 캐릭터로 바꾼다)
   words: [
     { w: '소인수',
+      // 영상 시안(10/18): 영상\3-1 소인수(모션그래픽).mp4 — 원본은 영상\원본\3-1 소인수.html. 아래 컷은 그 영상의 대본이다(at = 컷이 시작하는 초).
+      video: 'media/3-1_soinsu.mp4',
       daily: [
-        cut('‘소인수’를 나누어 보면 아는 말 두 개가 보여요.',
-            {fig: mg({t: 'split', whole: '소인수', parts: ['소수', '인수']}),
-             dir: '모션그래픽: 낱말 ‘소인수’가 가운데에서 갈라져 ‘소수’와 ‘인수’ 두 조각이 된다'}),
-        cut('사탕 6개를 친구 2명에게 똑같이 나누면 3개씩이에요.',
-            {fig: mg({t: 'grid', n: 6, cols: 3, e: '🍬', label: '2 × 3 = 6'}),
-             b: [[0, '사탕 6개, 둘이서 똑같이 나눠 먹자!']],
-             narr: '사탕 여섯 개를 친구 두 명에게 똑같이 나누면 세 개씩이에요.',
-             dir: '생활 장면: 사탕 6개가 3개씩 두 줄로 놓인다. 2 × 3 = 6이 나타난다'}),
-        cut('2와 3은 곱해서 6을 만드는 수, 6의 ‘인수’예요.',
-            {fig: mg({t: 'nums', label: '6의 인수', items: ['1', '2', '3', '6']}),
-             narr: '이와 삼은 곱해서 육을 만드는 수, 육의 인수예요.',
-             dir: '두 번째 조각 ‘인수’. 6의 인수가 하나씩 나타난다. 인수를 구하는 방법은 말하지 않는다'}),
-        cut('6의 인수 가운데 소수인 2와 3을 6의 ‘소인수’라고 해요.',
-            {fig: mg({t: 'nums', label: '6의 인수', items: ['1', '**2', '**3', '6']}, {t: 'join', parts: ['소수', '인수'], result: '소인수'}),
-             narr: '육의 인수 가운데 소수인 이와 삼을 육의 소인수라고 해요.',
-             dir: '모션그래픽: 소수 2와 3에 색이 들어오고, ‘소수’와 ‘인수’ 조각이 날아와 붙어 ‘소인수’가 된다(10/16 협의: “6의 소수인 약수는 2, 3이야, 이게 소인수야” 수준)'}),
+        cut({fig: mg({t: 'split', whole: '소인수', parts: ['소수', '인수']}), at: 0,
+             dir: '모션그래픽(0~8초): 큰 글자 ‘소인수’가 나타나 ‘소’는 파랑, ‘인수’는 분홍으로 물든다 → 아래에 ‘소수’ + ‘인수’ 카드가 올라오고 선으로 이어진다 → ‘소인수 = 소수 + 인수’ 식이 나온다. 자막·내레이션 없음'}),
+        cut({fig: mg({t: 'grid', n: 6, cols: 6, e: '🍬', label: '2개씩 3묶음'}), at: 8,
+             b: [[0, '나한테 사탕 6개가 있어!']],
+             dir: '생활 장면(8~13초): 아미르가 들어와 말한다 → 사탕 6개가 하나씩 나타난다 → 2개씩 세 묶음으로 옮겨 가고 묶음마다 점선 상자와 ‘2개’가 붙는다 → ‘2개씩 3묶음’'}),
+        cut('6은 2 곱하기 3이므로 2, 3은 6의 인수이다.',
+            {fig: eq('6 = **2** × **3**'), at: 13,
+             narr: '육은 이 곱하기 삼이므로 이, 삼은 육의 인수이다.',
+             dir: '모션그래픽(13~18초): 식 ‘6 = 2 × 3’이 나타나고, 2와 3이 분홍으로 바뀌며 위에 ‘인수’ 이름표가 붙는다'}),
+        cut('2, 3은 소수이므로 2, 3은 6의 소인수이다.',
+            {fig: mg({t: 'join', parts: ['소수', '인수'], result: '소인수'}), at: 18,
+             narr: '이, 삼은 소수이므로 이, 삼은 육의 소인수이다.',
+             dir: '모션그래픽(18~24초): 2와 3 아래에 ‘소수’ 이름표가 붙고, 위의 ‘인수’와 만나 ‘소인수’ 이름표로 합쳐진다. 2와 3이 보라로 바뀐다'}),
       ],
       card: card('소인수', '6의 소인수: 2, 3', '소인수는 소수인 인수예요.'),
       talk: {lines: [
@@ -362,6 +361,8 @@ canvas.wr{border:.14em solid #111;border-radius:.8em;background:#fffdf2;touch-ac
 .lgp .opt:disabled{color:inherit;opacity:1}.lgp .opt.m0{background:#ffd9e4}.lgp .opt.m1{background:#d6e8ff}.lgp .opt.m2{background:#d5f5e1}.lgp .opt.m3{background:#ffe9a6}
 .stage.port .lgp{width:100%;gap:5%}.stage.port .lgp .opt{font-size:.85em;padding:.4em .3em}
 .ck .go .lnk{border:0;background:none;font:inherit;font-weight:800;color:#1e4fb3;text-decoration:underline;cursor:pointer;padding:0}
+.vod.vv{background:#111}.vod .vvid{flex:1;min-height:0;width:100%;background:#000;object-fit:contain;display:block}
+.ctrl.vch{justify-content:center}.ctrl.vch button.on{background:#f5b400}
 .ctrl{display:flex;align-items:center;gap:.6em;background:#1118;color:#fff;padding:.3em 1em;font-size:.8em}
 .ctrl button{border:0;background:#fff;border-radius:.4em;padding:.1em .7em;font-weight:800}
 .ctrl .bar{flex:1;display:flex;gap:.25em}.ctrl .bar i{flex:1;height:.4em;background:#fff5;border-radius:9px}.ctrl .bar i.on{background:#fff}
@@ -856,7 +857,7 @@ const KIT=(function(){
     M.push({name:'오늘의 어휘',screens:[C({type:'listen',q:p.today_q||'낱말을 클릭해 소리를 들어 보세요.',tip:'🔊를 누르면 낱말을 읽어 줘요.',core:ess,items:nw.map(w=>({text:w}))},MEMO1.today)]});
     // 3. 어휘 학습(낱말마다)
     p.words.forEach((W,k)=>{ s=[];
-      s.push({type:'vod',title:'생활 속 뜻: '+W.w,cuts:W.daily,memo:W.daily_memo||MEMO1.daily});
+      s.push(Object.assign({type:'vod',title:'생활 속 뜻: '+W.w,cuts:W.daily,memo:W.daily_memo||MEMO1.daily},W.video?{video:W.video}:{}));
       s.push(C({type:'card_flip',q:'낱말을 클릭해 뜻을 확인해 보세요.',front:{text:W.card[0]},back:W.card[1],answerText:W.card[0]},MEMO1.card));
       if(W.talk) s.push(C({type:'talk',q:W.talk.q||'두 친구의 대화를 들어 보세요.',board:W.talk.board||'교과서',end:W.talk.end||'색이 다른 말풍선을 눌러 교과서 문장을 다시 들어 보세요.',
         lines:W.talk.lines.map(x=>Object.assign({who:x[0],text:x[1]},x[2]||{}))},MEMO1.talk));
@@ -1167,7 +1168,21 @@ function withFig(pad,sc){ // 그림이 있으면 물음은 종이 맨 위에 가
   return r;
 }
 const R={};
-R.vod=sc=>{
+// 영상(mp4)이 있는 화면: 영상을 재생하고, 아래 컷 단추로 대본의 컷(at 초)으로 옮겨 간다. '📜 대본'을 누르면 컷 대본 보기(vodCuts)로 바뀐다.
+R.vod=sc=>{ if(!sc.video||window.__vodScript) return R.vodCuts(sc);
+  const st=$('#stage'); st.innerHTML=''; st.classList.add('isvod'); const box=el('div','vod vv'); st.append(box);
+  const at=sc.cuts.map((c,k)=>c.at!=null?c.at:k*4), n=sc.cuts.length; let ci=-1;
+  const tag=el('div','tag notranslate',''); const v=document.createElement('video'); v.className='vvid'; v.src=sc.video; v.muted=true; v.playsInline=true; v.controls=true; v.preload='auto';
+  const ctrl=el('div','ctrl vch'), sw=el('button','','📜 대본'); sw.title='컷 대본으로 보기(업체에 전하는 컷별 대본·연출 메모)'; sw.onclick=()=>{ window.__vodScript=true; window.__cut=Math.max(0,ci); render(); };
+  const bt=sc.cuts.map((c,k)=>{ const b=el('button','','컷 '+(k+1)); b.onclick=()=>{ v.currentTime=at[k]+0.05; v.play().catch(()=>{}); }; return b; });
+  ctrl.append(...bt,sw); box.append(tag,v,ctrl);
+  const sync=()=>{ let k=0; at.forEach((a,j)=>{ if(v.currentTime+0.01>=a) k=j; }); if(k===ci) return; ci=k; tag.textContent='영상 · 컷 '+(k+1)+'/'+n; bt.forEach((b,j)=>b.classList.toggle('on',j===k)); showMemo(sc,sc.cuts[k]); };
+  v.addEventListener('timeupdate',sync); v.addEventListener('seeked',sync);
+  const c0=window.__cut!=null?Math.min(n-1,window.__cut):0; window.__cut=null;
+  v.addEventListener('loadedmetadata',()=>{ if(c0) v.currentTime=at[c0]+0.05; v.play().catch(()=>{}); },{once:true});
+  chrome(sc); ci=-1; tag.textContent='영상 · 컷 '+(c0+1)+'/'+n; bt[c0].classList.add('on'); ci=c0; showMemo(sc,sc.cuts[c0]);
+  R._cleanup=()=>{ try{ v.pause(); }catch(e){} }; return true; };
+R.vodCuts=sc=>{
   const st=$('#stage'); st.innerHTML=''; const PK=pkey(), saved=prog.get(PK)||{}, explicit=window.__cut!=null; let ci=Math.min(sc.cuts.length-1,window.__cut!=null?window.__cut:(saved.ci||0)), timer=null; window.__cut=null;
   const box=el('div','vod'); st.append(box); st.classList.add('isvod'); const done=saved.done||{};   // 참여 활동(ask)에 답한 컷 → 학생에게 돌려준 말
   const draw=()=>{
@@ -1194,7 +1209,7 @@ R.vod=sc=>{
     pb.onclick=()=>{stop(); if(ci>0){ci--;draw();}}; nb.onclick=()=>{stop(); if(ci<sc.cuts.length-1){ci++;draw();}};
     au.onclick=()=>{ if(timer){stop();draw();} else {play();draw();} };
     sp.onclick=()=>speak(open?a.q:(c.narr||(bubs.map(b=>b.text).join(' ')+' '+(c.caption||''))));
-    ctrl.append(pb,bar,nb,au,sp); box.append(ctrl); chrome(sc); showMemo(sc,c);
+    ctrl.append(pb,bar,nb,au,sp); if(sc.video){ const vb=el('button','','🎬 영상'); vb.title='영상으로 보기'; vb.onclick=()=>{ stop(); window.__vodScript=false; window.__cut=ci; render(); }; ctrl.append(vb); } box.append(ctrl); chrome(sc); showMemo(sc,c);
   };
   const stop=()=>{ if(timer){clearTimeout(timer); timer=null;} };
   // 이어 보기: 컷마다 글의 양에 맞춰 머무는 시간을 정한다(2.6초 + 글자당 0.085초, 길어도 9초). 참여 활동이 있는 컷은 답할 때까지 기다린다.
@@ -1473,10 +1488,10 @@ function voices(sc,cut){ const v=[]; if(sc.q) v.push(['낭독',sc.q,3]);
 // ── 검토 의견: 지금 화면에 대한 의견을 구글 시트(차시 / 페이지 / 부분 / 외부검토위원의견 …)에 한 줄로 남긴다 ──
 const CKEY='vocabcmt:'+(LESSON.code||'');
 const cstore={ get(){ try{ return JSON.parse(localStorage.getItem(CKEY)||'{}')||{}; }catch(e){ return {}; } }, set(v){ try{ localStorage.setItem(CKEY,JSON.stringify(v)); }catch(e){} } };
-function pageLabel(){ const mod=LESSON.modules[mi], sc=mod.screens[si]; let t=(mi+1)+'-'+(si+1)+' '+mod.name+' · '+(sc.book?'교과서 문장 읽기':(TYPE_KO[sc.type]||sc.type)); const tg=$('#stage .tag'); if(sc.type==='vod'&&tg){ const m=tg.textContent.match(/컷 (\d+)\/(\d+)/); if(m) t+=' · '+m[1]+'번째 컷(전체 '+m[2]+'컷)'; } return t; }
+function pageLabel(){ const mod=LESSON.modules[mi], sc=mod.screens[si]; let t=(mi+1)+'-'+(si+1)+' '+mod.name+' · '+(sc.book?'교과서 문장 읽기':(TYPE_KO[sc.type]||sc.type)); const tg=$('#stage .tag'); if(sc.type==='vod'&&tg){ const m=tg.textContent.match(/컷 (\d+)\/(\d+)/); if(m) t+=' · '+m[1]+'번째 컷(전체 '+m[2]+'컷)'; const vd=$('#stage video'); if(vd){ const x=Math.floor(vd.currentTime||0); t+=' · 영상 '+Math.floor(x/60)+':'+String(x%60).padStart(2,'0')+' 지점'; } } return t; }
 // 부분: 번호(원 문자)는 모든 화면에서 같다. 화면 위의 어느 요소가 어느 부분인지는 sel(선택자)로 찾아 상자와 번호를 붙인다.
 const PARTS=[['화면 전체',''],['지시문','.qin,.askp .aq'],['낱말 뜻·설명','.card,.motion,.gdchips,.rc .cd,.cur,.ck .ex'],['용례(문장·대화)','.tkb,.say:not(.tp):not(.col),.sent,.sp'],
-  ['그림·영상 연출','.vod .board,.two .lf,.tkboard,.gdav,.tkav,.vod .who,.ckguide .gdav'],['대사·내레이션','.vod .bub,.vod .capt:not(.none),.gdb,.ckguide>div:last-child'],
+  ['그림·영상 연출','.vod video,.vod .board,.two .lf,.tkboard,.gdav,.tkav,.vod .who,.ckguide .gdav'],['대사·내레이션','.vod .bub,.vod .capt:not(.none),.gdb,.ckguide>div:last-child'],
   ['활동(보기·정답)','.opts,.chips,.askp .ar,.ox,.lt,.so,.pzs,.lc,.ck'],['쓰기·말하기','canvas.wr,.ghostword,.say.tp,.say.col,.rec'],['오개념',''],['기타','']];
 const CIRC='①②③④⑤⑥⑦⑧⑨⑩';
 // 검토위원 확인: 이름으로 처음 기록할 때 비밀번호를 정하고, 다음부터는 비밀번호가 맞아야 기록·고치기를 한다. 모든 차시가 같은 서버라 비밀번호도 모든 차시에서 같다.
@@ -1695,7 +1710,7 @@ function render(){
   document.querySelectorAll('#stage .sent, #stage .chips, #stage .opts, #stage .ox, #stage .lt, #stage .say, #stage .card, #stage .motion, #stage .nav, #stage input, #stage .cur .it').forEach(e=>{e.classList.add('notranslate'); e.setAttribute('translate','no');});
   history.replaceState(null,'','#'+(mi+1)+'-'+(si+1)); if(window._chat) window._chat.where();
 }
-function go(d){ const mod=LESSON.modules[mi]; if(d>0){ if(si<mod.screens.length-1) si++; else if(mi<LESSON.modules.length-1){mi++;si=0;} } else { if(si>0) si--; else if(mi>0){mi--;si=LESSON.modules[mi].screens.length-1;} } render(); }
+function go(d){ window.__vodScript=false; const mod=LESSON.modules[mi]; if(d>0){ if(si<mod.screens.length-1) si++; else if(mi<LESSON.modules.length-1){mi++;si=0;} } else { if(si>0) si--; else if(mi>0){mi--;si=LESSON.modules[mi].screens.length-1;} } render(); }
 function init(){
   window.__kitOk=true; document.title=(LESSON.code||'')+' '+LESSON.title+' · 수학 한국어 어휘 시안';
   { const r=KIT.check(SPEC), n=r.err.length+r.warn.length, b=$('#checkBtn'); b.textContent=n?'점검 '+n:'점검 ✓'; if(r.err.length) b.style.cssText='background:#ffd6d6;border-color:#d23a3a;color:#a11'; else if(n) b.style.cssText='background:#fff1b8;border-color:#c79a00'; b.onclick=showCheck; }
