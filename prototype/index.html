@@ -70,6 +70,7 @@ const LESSON_SPEC = () => ({
   colloc: ['~의 소인수', '~을/를 소인수분해하면 ~입니다', '~의 거듭제곱'],
   keep: ['분해', '거듭', '제곱'],
   guide_name: '안내',
+  ask_url: 'https://script.google.com/macros/s/AKfycbwB6R5cWqCF7lY8wBxwsEtu45AKvTrceFa9mjPvFSCPKfHWmh8NpN10yzFiXTdPrbiL/exec',   // 지침 도우미(집필진·검토위원용 AI 질문) 서버 주소 — 접속 암호가 있어야 답한다
   comment_url: 'https://script.google.com/macros/s/AKfycbyyVQ9bYSSTL5T0yYCiYR_xMSjfuE04w0ZHRJoC4DZLVoZPCOn9E2EVxwMrGGSf3OZlew/exec',   // 검토 의견을 기록할 구글 시트(Apps Script) 주소
 
   // ── 1. 들어가기 ─────────────────────────────────────────────
@@ -501,7 +502,7 @@ canvas.wr{border:.14em solid #111;border-radius:.8em;background:#fffdf2;touch-ac
 @media(max-width:1200px){.top .ttl{display:none}.lang{flex:1;min-width:0}#langSel{flex:1;min-width:0;max-width:none}}
 /* ── 반응형: 좁은 화면(휴대폰)에서는 위쪽 줄을 줄이고, 세로로 긴 화면에서는 무대를 세로형(.port)으로 바꿔 내용을 위아래로 쌓는다 ── */
 @media(max-width:900px),(max-height:500px){
-  .top{flex-wrap:wrap;gap:6px;padding:6px 8px}.top .ttl,#memoBtn,#resetBtn span{display:none}
+  .top{flex-wrap:wrap;gap:6px;padding:6px 8px}.top .ttl,#memoBtn,#resetBtn span,#askBtn span{display:none}
   .homebtn{padding:5px 10px;font-size:13px}.top button{padding:5px 10px;font-size:13px}
   .lang{flex:1;min-width:0;padding:2px 8px}#langSel{max-width:none;flex:1;min-width:0;width:100%}#langReset{padding:3px 8px;font-size:12px}
   .wrap{padding:6px}
@@ -615,6 +616,16 @@ canvas.wr{border:.14em solid #111;border-radius:.8em;background:#fffdf2;touch-ac
 .cmtp .msg{min-height:1.3em;font-weight:800;margin-top:6px;font-size:13px}.cmtp .msg.ok{color:#0a8f5b}.cmtp .msg.no{color:#d23a3a}
 .cmtp .mine{margin-top:8px;font-size:12px;color:#5b6b8c;border-top:1px dashed #cfd6e4;padding-top:7px}
 #cmtBtn.on{background:#e8457a;color:#fff;border-color:#e8457a}
+#askBtn.on{background:#6d28d9;color:#fff;border-color:#6d28d9}
+.cmtp.ask{overflow:hidden;padding-bottom:10px}.cmtp.ask h2{color:#6d28d9}
+.ask .gate{margin-top:8px;font-size:13px;color:#374151}.ask .gate .r{display:flex;gap:6px;margin-top:6px}.ask .gate button,.ask form button{border:0;border-radius:99px;padding:6px 14px;font:inherit;font-weight:800;background:#6d28d9;color:#fff;cursor:pointer;white-space:nowrap}
+.ask .log{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:8px;background:#f6f5fb;border-radius:10px;padding:8px;margin-top:6px}
+.ask .m{max-width:94%;padding:7px 10px;border-radius:10px;line-height:1.5;white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;font-size:13.5px}
+.ask .m.q{align-self:flex-end;background:#6d28d9;color:#fff;border-bottom-right-radius:3px}.ask .m.a{align-self:flex-start;background:#fff;border:1px solid #ddd6fe;border-bottom-left-radius:3px}
+.ask .m.wait{color:#6b7280;font-style:italic}.ask .m.err{color:#b91c1c}.ask .m .src{display:block;margin-top:5px;padding-top:4px;border-top:1px dashed #ddd6fe;font-size:11.5px;color:#6b7280}
+.ask .qs{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:4px;margin-top:6px;padding-bottom:3px;flex:none}.ask .qs button{flex:none}.ask .qs button{border:1px solid #c4b5fd;color:#5b21b6;background:#fff;border-radius:99px;padding:2px 9px;font:inherit;font-size:12px;cursor:pointer}
+.ask form{display:flex;gap:6px;margin-top:6px;align-items:flex-end}.ask form textarea{flex:1;min-height:40px;max-height:120px;resize:vertical;font:inherit;font-size:14px;border:1px solid #cfd5df;border-radius:8px;padding:6px 9px}
+.ask .ft{font-size:11px;color:#6b7280;margin-top:4px}.ask .hd .new{border:0;background:#ede9fe;color:#5b21b6;border-radius:99px;padding:4px 10px;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
 /* 화면 위 부분 표시: 무대 위에 겹친 투명한 층. 상자는 누를 수 없고(아래 화면을 그대로 조작) 번호만 누를 수 있다 */
 #cmtov{position:fixed;pointer-events:none;overflow:hidden;z-index:40;display:none}#cmtov.on{display:block}
 #cmtov .bx{position:absolute;border:2px dashed #e8457a;border-radius:8px;background:#e8457a0d}
@@ -644,6 +655,7 @@ canvas.wr{border:.14em solid #111;border-radius:.8em;background:#fffdf2;touch-ac
       <button class="ghost notranslate" id="memoBtn">제작 메모</button>
       <button class="ghost notranslate" id="checkBtn" title="차시 내용이 약속에 맞는지 점검한 결과를 봅니다">점검</button>
       <button class="ghost" id="resetBtn" title="이 차시에서 한 활동 기록을 지워요">↺<span> 기록 지우기</span></button>
+      <button class="ghost notranslate" id="askBtn" title="회의록·키트 지침·틀을 근거로 AI에게 물어요(집필진·검토위원용, 접속 암호 필요)" style="display:none">🤖<span> 지침 묻기</span></button>
       <button class="ghost notranslate cmtb" id="cmtBtn" title="오른쪽에 검토 의견 칸을 열고 닫아요(구글 시트에 기록)">💬 검토 의견</button>
       <div class="ttl notranslate" id="topTitle"></div>
       <button id="prevMod">‹ 목차</button><button id="nextMod">목차 ›</button>
@@ -652,6 +664,7 @@ canvas.wr{border:.14em solid #111;border-radius:.8em;background:#fffdf2;touch-ac
       <div class="stage" id="stage"></div>
       <div class="memo notranslate" id="memo"></div>
       <aside class="cmtp notranslate" id="cmtp" translate="no"></aside>
+      <aside class="cmtp ask notranslate" id="askp" translate="no"></aside>
     </div>
   </section>
 </div>
@@ -848,7 +861,7 @@ const KIT=(function(){
     if((p.colloc||[]).length) vocab['공기관계어']=p.colloc;
     const keep=[...new Set(nw.concat(aux,pre.map(x=>x[0]),p.keep||[]).filter(w=>w.length>=2||nw.includes(w)))].sort((a,b)=>b.length-a.length||(a<b?-1:a>b?1:0));
     const A=String(row.std||'').split('\n'), B=String(row.std_text||'').split('\n');
-    const L={flow:'1016',tries:3,tips:null,chat:null,comment:p.comment_url?{url:p.comment_url}:{url:''},code:'L'+String(no).padStart(2,'0'),no:no,title:p.title||row.title,grade:GRADE[row.grade]||'',
+    const L={flow:'1016',tries:3,tips:null,chat:null,comment:p.comment_url?{url:p.comment_url}:{url:''},ask:p.ask_url?{url:p.ask_url}:null,code:'L'+String(no).padStart(2,'0'),no:no,title:p.title||row.title,grade:GRADE[row.grade]||'',
       standard:p.std||A.map((a,i)=>a+' '+(B[i]||'')).join(' / '),unit:p.unit,lessonType:'개념 중심 차시 (10분 안팎) · 학습 어휘 '+nw.length+'개'+(pre.length?', 미리 확인할 말 '+pre.length+'개':''),
       words:nw,keep:keep,cast:CAST,guide:p.guide_name||'안내 캐릭터',vocab:vocab,modules:M};
     L.meta={}; ['author','status','updated'].forEach(k=>{ if(k in p) L.meta[k]=p[k]; });
@@ -1456,7 +1469,7 @@ async function flushPending(){ const s=cstore.get(); const p=s.pending||[]; if(!
   for(const row of p){ try{ await postComment(row); n++; (s.sent=s.sent||[]).push(row); }catch(e){ left.push(row); } } s.pending=left; cstore.set(s); return n; }
 let cpart=0;
 function cmtOn(){ return $('#cmtp').classList.contains('on'); }
-function openComment(){ const p=$('#cmtp'); if(cmtOn()){ closeComment(); return; }
+function openComment(){ const p=$('#cmtp'); if(cmtOn()){ closeComment(); return; } closeAsk(true);
   if(!p.firstChild){ const s=cstore.get();
     p.innerHTML='<div class="hd"><h2>💬 검토 의견 남기기</h2><button class="x" id="cmtX" title="닫기">✕</button></div>'
       +'<label>차시</label><div class="ro" id="cmtLesson"></div><label>페이지</label><div class="ro" id="cmtPage"></div>'
@@ -1479,7 +1492,7 @@ function openComment(){ const p=$('#cmtp'); if(cmtOn()){ closeComment(); return;
   }
   p.classList.add('on'); document.body.classList.add('cmton'); $('#cmtBtn').classList.add('on'); $('#cmtMsg').textContent='';
   if(fit()) render(); else cmtRefresh(); cmtMine(); if(innerWidth>900) setTimeout(()=>$('#cmtText').focus(),50); }
-function closeComment(){ $('#cmtp').classList.remove('on'); document.body.classList.remove('cmton'); $('#cmtBtn').classList.remove('on'); $('#cmtov')&&$('#cmtov').classList.remove('on'); if(fit()) render(); }
+function closeComment(keep){ $('#cmtp').classList.remove('on'); if(!keep) document.body.classList.remove('cmton'); $('#cmtBtn').classList.remove('on'); $('#cmtov')&&$('#cmtov').classList.remove('on'); if(!keep&&fit()) render(); }
 function cmtMine(){ const v=cstore.get(); const a=(v.sent||[]).length, p=(v.pending||[]).length; $('#cmtMine').textContent='이 기기에서 남긴 의견: 기록됨 '+a+'개'+(p?' · 아직 못 보냄 '+p+'개(다음에 다시 보내요)':''); }
 function pickPart(k){ cpart=k; cmtRefresh(); }
 // 화면 위에 부분 상자와 번호를 그린다. 화면이 바뀌거나(영상 컷, 대화 펼침 포함) 크기가 바뀌면 다시 그린다.
@@ -1502,6 +1515,48 @@ function cmtRefresh(){ if(!cmtOn()) return; const st=$('#stage'); if(!st) return
 { let raf=0; const kick=()=>{ if(!raf) raf=requestAnimationFrame(()=>{ raf=0; cmtRefresh(); }); };
   new MutationObserver(kick).observe(document.getElementById('stage'),{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']});
   document.addEventListener('scroll',kick,true); window.addEventListener('resize',kick); setInterval(()=>{ if(cmtOn()) cmtRefresh(); },700); }   // 카드 뒤집기·글자 나타나기처럼 움직이는 화면도 따라간다
+// ── 지침 도우미: 회의록·집필진 키트 지침·틀·샘플 원고를 근거로 AI(Gemini)가 답한다. 서버는 쑥쑥이와 같은 Apps Script(Guide.js), 접속 암호가 있어야 답한다 ──
+const AKEY='vocabask:'+(LESSON.code||'');
+const astore={ get(){ try{ return JSON.parse(localStorage.getItem(AKEY)||'{}')||{}; }catch(e){ return {}; } }, set(v){ try{ localStorage.setItem(AKEY,JSON.stringify(v)); }catch(e){} } };
+const ASK_QS=['이 화면이 지침에 맞나요?','이 화면의 지시문은 기존 목록에 있나요?','생활 속 뜻 장면은 어떻게 만들어요?','10/16 협의에서 바뀐 점은?','업체가 시안에 대해 지적한 점은?','오개념은 어디까지 허용하나요?'];
+function askOn(){ return $('#askp').classList.contains('on'); }
+async function askPost(b){ const r=await fetch(LESSON.ask.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({mode:'guide',pw:astore.get().pw||''},b))}); return r.json(); }
+// 지금 화면을 서버에 함께 보낸다: 위치, 화면 종류, 원고에 적힌 이 화면의 내용(그림 정보는 뺀다), 화면에 보이는 글
+function askPage(){ const mod=LESSON.modules[mi], sc=mod.screens[si];
+  const spec=JSON.stringify(sc,(k,v)=>k==='fig'||k==='svg'?undefined:v).slice(0,2500), txt=($('#stage').innerText||'').replace(/\s+\n/g,'\n').slice(0,1200);
+  return '차시: '+LESSON.no+'차시 '+LESSON.title+'\n페이지: '+pageLabel()+'\n화면 종류: '+sc.type+(sc.coin?' / 코인: '+(sc.coin.join(',')||'없음'):'')+'\n원고(이 화면의 LESSON_SPEC 항목): '+spec+'\n화면에 보이는 글:\n'+txt; }
+function openAsk(){ const p=$('#askp'); if(askOn()){ closeAsk(); return; } if(cmtOn()) closeComment(true);
+  if(!p.firstChild) askBuild();
+  p.classList.add('on'); document.body.classList.add('cmton'); $('#askBtn').classList.add('on'); if(fit()) render(); askDraw(); }
+function closeAsk(keep){ const p=$('#askp'); if(!p||!askOn()) return; p.classList.remove('on'); $('#askBtn').classList.remove('on'); if(!keep){ document.body.classList.remove('cmton'); if(fit()) render(); } }
+function askBuild(){ const p=$('#askp');
+  p.innerHTML='<div class="hd"><h2>🤖 지침 묻기</h2><button class="new" id="askNew" title="대화를 지우고 새로 시작">새 대화</button><button class="x" id="askX" title="닫기">✕</button></div>'
+    +'<div class="gate" id="askGate">집필진·검토위원용이에요. 안내받은 접속 암호를 넣어 주세요.<div class="r"><input id="askPw" type="password" autocomplete="off" placeholder="접속 암호"><button id="askPwGo">확인</button></div><div class="msg" id="askPwMsg"></div></div>'
+    +'<div class="log" id="askLog"></div><div class="qs" id="askQs"></div>'
+    +'<form id="askForm"><textarea id="askIn" maxlength="600" placeholder="지침에 대해 물어보세요. 지금 보는 화면도 함께 보내요. (Enter 보내기, Shift+Enter 줄바꿈)"></textarea><button>보내기</button></form>'
+    +'<div class="ft">회의록·집필진 키트·틀·샘플 원고를 근거로 AI가 답해요. 틀릴 수 있으니 답 끝의 [자료 이름]을 확인해 주세요.</div>';
+  $('#askX').onclick=()=>closeAsk(); $('#askNew').onclick=()=>{ const v=astore.get(); v.hist=[]; astore.set(v); askDraw(); };
+  ASK_QS.forEach(q=>{ const b=el('button','',q); b.type='button'; b.onclick=()=>askSend(q); $('#askQs').append(b); });
+  const pwGo=async()=>{ const pw=$('#askPw').value.trim(), m=$('#askPwMsg'); if(!pw) return; m.className='msg'; m.textContent='확인하는 중…';
+    try{ const v=astore.get(); v.pw=pw; astore.set(v); const j=await askPost({check:1}); if(j.ok){ m.textContent=''; askDraw(); } else { v.pw=''; astore.set(v); m.className='msg no'; m.textContent=j.err==='pass'?'암호가 맞지 않아요.':'지금은 확인할 수 없어요.'; } }
+    catch(e){ m.className='msg no'; m.textContent='서버에 연결하지 못했어요.'; } };
+  $('#askPwGo').onclick=pwGo; $('#askPw').onkeydown=e=>{ if(e.key==='Enter') pwGo(); };
+  $('#askForm').onsubmit=e=>{ e.preventDefault(); askSend($('#askIn').value); };
+  $('#askIn').onkeydown=e=>{ if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){ e.preventDefault(); askSend($('#askIn').value); } }; }
+function askMsg(cls,t,src){ const m=el('div','m '+cls); m.textContent=t; if(src&&src.length){ const s=el('span','src'); s.textContent='참고한 자료: '+src.join(' · '); m.append(s); } $('#askLog').append(m); $('#askLog').scrollTop=$('#askLog').scrollHeight; return m; }
+function askDraw(){ const v=astore.get(), ok=!!v.pw; $('#askGate').style.display=ok?'none':''; ['askLog','askQs','askForm'].forEach(id=>$('#'+id).style.display=ok?'':'none');
+  if(!ok){ setTimeout(()=>$('#askPw').focus(),50); return; }
+  $('#askLog').innerHTML=''; askMsg('a','안녕하세요. 회의록(10/5·10/11·10/16), 10/18 확정 사항, 집필진 키트 지침, 원고 틀, 소인수분해 원고를 바탕으로 답해요. 지금 보는 화면에 대해서도 물어볼 수 있어요.');
+  (v.hist||[]).forEach(h=>askMsg(h.r==='a'?'a':'q',h.t,h.src)); if(innerWidth>900) setTimeout(()=>$('#askIn').focus(),50); }
+let askBusy=false;
+async function askSend(q){ q=String(q||'').trim(); if(!q||askBusy) return; askBusy=true; $('#askIn').value='';
+  const v=astore.get(), hist=(v.hist||[]); askMsg('q',q); const w=askMsg('a wait','자료를 찾아 답을 쓰는 중이에요… (10초쯤 걸려요)');
+  try{ const j=await askPost({q,hist:hist.slice(-6).map(h=>({r:h.r,t:h.t})),page:askPage()}); w.remove();
+    if(j.ok){ const cited=(j.src||[]).filter(n=>j.a.includes(n.replace(/\(.*$/,'').trim())); j.src=cited.length?cited:j.src; askMsg('a',j.a,j.src); const s=astore.get(); s.hist=(s.hist||[]).concat([{r:'q',t:q},{r:'a',t:j.a,src:j.src}]).slice(-40); astore.set(s); }
+    else if(j.err==='pass'){ const s=astore.get(); s.pw=''; astore.set(s); askDraw(); }
+    else askMsg('a err',j.err==='quota'||j.err==='limit'?'오늘 쓸 수 있는 질문 수를 넘었어요. 내일 다시 물어봐 주세요.':'지금은 답하지 못했어요. 잠시 뒤 다시 물어봐 주세요.'); }
+  catch(e){ w.remove(); askMsg('a err','서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.'); }
+  askBusy=false; }
 function showMemo(sc,cut){
   const m=$('#memo'); let h=`<h3>제작 메모</h3><dl><dt>위치</dt><dd>${mi+1}. ${LESSON.modules[mi].name} · 화면 ${si+1}</dd><dt>원본 유형</dt><dd><code>${sc.type}</code> ${TYPE_KO[sc.type]||''}</dd>`;
   if(sc.q) h+=`<dt>지시문</dt><dd>${plain(sc.q)}</dd>`;
@@ -1517,7 +1572,7 @@ function showMemo(sc,cut){
 function fit(){ const st=$('#stage'); st.style.width=st.style.height='0px'; const w=st.parentElement, cs=getComputedStyle(w), memo=$('#memo');
   let W=w.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight), H=w.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
   if(memo&&memo.offsetWidth) W-=memo.offsetWidth+10;
-  { const cp=$('#cmtp'); if(cp&&cp.offsetWidth){ if(getComputedStyle(w).flexDirection==='column') H-=cp.offsetHeight+10; else W-=cp.offsetWidth+10; } }
+  for(const cp of document.querySelectorAll('.cmtp.on')){ if(cp&&cp.offsetWidth){ if(getComputedStyle(w).flexDirection==='column') H-=cp.offsetHeight+10; else W-=cp.offsetWidth+10; } }
   const port=W<900&&H>W*1.15; let cw,ch,fs;
   if(port){ cw=Math.min(W,600); ch=Math.min(H,cw*1.8); fs=cw/23; } else { cw=Math.max(120,Math.min(W,H*16/9)); ch=cw*9/16; fs=cw/46; }
   const was=st.classList.contains('port'); st.classList.toggle('port',port);
@@ -1545,6 +1600,7 @@ function init(){
   initChat(); progInit();
   { const rb=$('#resetBtn'); let arm=0; rb.onclick=()=>{ if(!arm){ arm=1; rb.textContent='한 번 더 누르면 지워요'; setTimeout(()=>{ arm=0; rb.innerHTML='↺<span> 기록 지우기</span>'; },3000); return; } arm=0; prog.clear(); rb.innerHTML='↺<span> 기록 지우기</span>'; render(); }; }
   $('#cmtBtn').onclick=openComment; flushPending();
+  if(LESSON.ask&&LESSON.ask.url){ $('#askBtn').style.display=''; $('#askBtn').onclick=openAsk; }
   $('#memoBtn').onclick=()=>{ memoOn=!memoOn; $('#memo').classList.toggle('on',memoOn); $('#memoBtn').classList.toggle('on',memoOn); render(); };
   const hc=location.hash.match(/#\d+-\d+-(\d+)/); if(hc) window.__cut=hc[1]-1;
   const h=location.hash.match(/#(\d+)-(\d+)(?:-\d+)?(m?)/); if(h){ mi=Math.min(LESSON.modules.length-1,h[1]-1); si=Math.min(LESSON.modules[mi].screens.length-1,h[2]-1); if(h[3]){memoOn=true;$('#memo').classList.add('on');$('#memoBtn').classList.add('on');} }
