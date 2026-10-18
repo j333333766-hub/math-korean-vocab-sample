@@ -56,17 +56,18 @@ function fill(sentence,options,answer,q,o){ return Object.assign({type:'drag_dro
   흐름: 들어가기 → 오늘의 어휘 → 어휘 학습(낱말마다: 생활 속 뜻 → 뜻 확인 → 용례 대화 → 따라 읽기) → 수학적으로 말하기 → 마무리
   고친 기록:
     2026-10-18 10/16 협의 반영 프로토타입으로 새로 씀(사용자 결정: 생활 속 뜻 장면 살림, 용례 대화 포함, 손글씨 1개, 밑·지수 뺌, 교과서 문제 문장은 읽기만)
+    2026-10-19 생활 속 뜻 세 낱말을 영상 시안(mp4)으로 바꾸고 컷 대본을 영상에 맞춤 / 소수 뜻에 ‘2개뿐’을 넣음(1을 소수로 오해하지 않게) / 소인수분해 뜻을 ‘자연수를’로(영상·교과서와 같게) / 대화의 ‘자전거’→‘블록’, 거듭제곱 대화 첫 문장 다듬음
 ══════════════════════════════════════════════════════════════*/
 const LESSON_SPEC = () => ({
   flow: '1016',
   // ── 기본 정보 ─────────────────────────────────────────────
   no: 8,
-  author: '조창현', status: '프로토타입', updated: '2026-10-18',
+  author: '조창현', status: '프로토타입', updated: '2026-10-19',
   unit: '중학교 1학년 · ‘소인수분해’ 소단원을 배우기 전에 보는 콘텐츠',
   new: ['소인수분해', '소인수', '거듭제곱'],   // 학습 어휘(60차시 목록과 같게)
   ess: ['소인수분해'],                        // 필수어휘(★)
   aux: ['인수'],                              // 함께 보는 말(‘소인수’를 조각으로 나눌 때만 나온다)
-  pre: [['소수', 7, '약수가 1과 자기 자신뿐인 수. 예: 2, 3, 5, 7']],
+  pre: [['소수', 7, '약수가 1과 자기 자신, 2개뿐인 수. 예: 2, 3, 5, 7']],
   colloc: ['~의 소인수', '~을/를 소인수분해하면 ~입니다', '~의 거듭제곱'],
   keep: ['분해', '거듭', '제곱'],
   guide_name: '안내',
@@ -78,7 +79,7 @@ const LESSON_SPEC = () => ({
   intro_say: '학교에서 ‘소인수분해’를 배우기 전에 오늘 만날 낱말 세 개를 먼저 익혀 봐요.',
   intro_note: '수학은 이미 알고 있어요. 오늘은 한국어 이름을 알아봐요.',
   pre_q: '낱말을 클릭해 뜻을 확인해 보세요.',
-  pre_cards: [card('소수', '2, 3, 5, 7', '소수는 약수가 1과 자기 자신뿐인 수예요.\n(7차시에서 배운 말)')],
+  pre_cards: [card('소수', '2, 3, 5, 7', '소수는 약수가 1과 자기 자신, 2개뿐인 수예요.\n(7차시에서 배운 말)')],   // ‘2개뿐’: 1을 소수로 오해하지 않게(1의 약수는 1 하나뿐)
 
   // ── 2. 오늘의 어휘 ───────────────────────────────────────────
   today_q: '낱말을 클릭해 소리를 들어 보세요.',
@@ -139,7 +140,7 @@ const LESSON_SPEC = () => ({
              narr: '이것을 소인수분해라고 해요.',
              dir: '모션그래픽(26.5~31초): 식이 왼쪽으로 비키고 오른쪽에 ‘소인수분해’(소인수 보라 + 분해 주황)가 크게 나타난다'}),
       ],
-      card: card('소인수분해', {fig: eq('6 = 2 × 3'), cap: '소인수분해는 수를 소인수의 곱으로 나타내는 거예요.'}),
+      card: card('소인수분해', {fig: eq('6 = 2 × 3'), cap: '소인수분해는 자연수를 소인수의 곱으로 나타내는 거예요.'}),
       talk: {lines: [
         [0, '교과서에 ‘소인수분해’가 나왔어.', {fig: eq('6 = 2 × 3')}],
         [1, '“6을 **소인수분해**하면\n6 = 2 × 3입니다.”', {use: '소인수분해', say: '육을 소인수분해하면 육은 이 곱하기 삼입니다.'}],
@@ -176,7 +177,7 @@ const LESSON_SPEC = () => ({
       ],
       card: card('거듭제곱', {fig: pw(2, 3, {labels: false, eqs: '2 × 2 × 2 = 2³'}), cap: '거듭제곱은 같은 수를 여러 번 곱한 거예요.'}),
       talk: {lines: [
-        [0, '2 × 2 × 2를 짧게 쓴 게 교과서에 있어.', {fig: eq('2 × 2 × 2 = 2³'), say: '이 곱하기 이 곱하기 이를 짧게 쓴 게 교과서에 있어.'}],
+        [0, '교과서에 2 × 2 × 2를 짧게 쓴 식이 있어.', {fig: eq('2 × 2 × 2 = 2³'), say: '교과서에 이 곱하기 이 곱하기 이를 짧게 쓴 식이 있어.'}],
         [1, '“2³은 2의 **거듭제곱**입니다.”', {use: '거듭제곱', say: '이의 세제곱은 이의 거듭제곱입니다.'}],
         [0, '2를 거듭 곱했으니까 거듭제곱이구나!', {say: '이를 거듭 곱했으니까 거듭제곱이구나!'}],
       ]},
@@ -201,7 +202,7 @@ const LESSON_SPEC = () => ({
   // ── 5. 마무리 ─────────────────────────────────────────────
   summary: [
     ['소인수', '6의 소인수: 2, 3', '소수인 인수'],
-    ['소인수분해', '6 = 2 × 3', '수를 소인수의 곱으로 나타내는 것'],
+    ['소인수분해', '6 = 2 × 3', '자연수를 소인수의 곱으로 나타내는 것'],
     ['거듭제곱', '2 × 2 × 2 = 2³', '같은 수를 여러 번 곱한 것'],
   ],   // [낱말, 예, 뜻]
   outro_say: '오늘 낱말 세 개를 모두 만났어요. 수업에서 이 낱말을 들으면 오늘을 떠올려 봐요.',
@@ -380,7 +381,13 @@ canvas.wr{border:.14em solid #111;border-radius:.8em;background:#fffdf2;touch-ac
 .stage.port .lgp{width:100%;gap:5%}.stage.port .lgp .opt{font-size:.85em;padding:.4em .3em}
 .ck .go .lnk{border:0;background:none;font:inherit;font-weight:800;color:#1e4fb3;text-decoration:underline;cursor:pointer;padding:0}
 .vod.vv{background:#111}.vod .vvid{flex:1;min-height:0;width:100%;background:#000;object-fit:contain;display:block}
-.ctrl.vch{justify-content:center}.ctrl.vch button.on{background:#f5b400}
+.ctrl.vch{justify-content:center;flex-wrap:wrap}.ctrl.vch button{white-space:nowrap}
+.stage.vvon .count{display:none}
+.vod .vinfo{display:none}
+.stage.port .vod.vv .vvid{flex:none;height:auto;aspect-ratio:16/9}
+.stage.port .vod.vv .vinfo{display:block;flex:1;min-height:0;overflow:auto;background:#fff;color:#1d2433;padding:.8em 1em;font-size:.95em;line-height:1.5}
+.vod .vinfo b{display:inline-block;background:#1d2433;color:#fff;border-radius:.4em;padding:0 .5em;font-size:.85em;margin-bottom:.3em}.vod .vinfo .vc{font-weight:800}.vod .vinfo .vs{color:#5b6b8c}
+.stage.port .vod.vv .tag{position:static;align-self:flex-end;margin:.3em .5em}.ctrl.vch button.on{background:#f5b400}
 .ctrl{display:flex;align-items:center;gap:.6em;background:#1118;color:#fff;padding:.3em 1em;font-size:.8em}
 .ctrl button{border:0;background:#fff;border-radius:.4em;padding:.1em .7em;font-weight:800}
 .ctrl .bar{flex:1;display:flex;gap:.25em}.ctrl .bar i{flex:1;height:.4em;background:#fff5;border-radius:9px}.ctrl .bar i.on{background:#fff}
@@ -683,7 +690,7 @@ canvas.wr{border:.14em solid #111;border-radius:.8em;background:#fffdf2;touch-ac
     <h1 id="lessonTitle" class="notranslate"></h1>
     <div class="meta" id="lessonMeta"></div>
     <div class="toc" id="toc"></div>
-    <div class="note notranslate">이 화면은 <b>프로토타입 원고</b>입니다(10/16 협의 반영).<br>· 영상 자리는 장면을 한 컷씩 넘겨 보는 <b>영상 대본</b>입니다. 실제 영상·캐릭터는 업체가 만듭니다.<br>· 화면 오른쪽 위 🪙는 그 활동의 보상 영역(말하기·듣기·읽기·쓰기)입니다.<br>· <b>제작 메모</b>를 켜면 화면마다 원본 유형, 음원(튜토리얼·대사·낭독), 지시문 확인, 메모가 보입니다.<br>· <b>💬 검토 의견</b>을 누르면 지금 화면에 대한 의견이 구글 시트에 기록됩니다.<br>· 말하기 녹음, 손글씨 인식은 화면만 있고 채점하지 않습니다. 고르기·빈칸은 3번 틀리면 정답을 보여 주고 넘어갑니다.</div>
+    <div class="note notranslate">이 화면은 <b>프로토타입 원고</b>입니다(10/16 협의 반영).<br>· 낱말마다 ‘생활 속 뜻’은 <b>영상 시안</b>(소리 없음)으로 재생됩니다. 아래 컷 단추로 장면을 옮기고, <b>📜 대본</b>을 누르면 업체에 전할 컷별 대본·연출 메모가 보입니다. 실제 영상·캐릭터는 업체가 만듭니다.<br>· 화면 오른쪽 위 🪙는 그 활동의 보상 영역(말하기·듣기·읽기·쓰기)입니다.<br>· <b>제작 메모</b>를 켜면 화면마다 원본 유형, 음원(튜토리얼·대사·낭독), 지시문 확인, 메모가 보입니다.<br>· <b>💬 검토 의견</b>을 누르면 지금 화면에 대한 의견이 구글 시트에 기록됩니다.<br>· 말하기 녹음, 손글씨 인식은 화면만 있고 채점하지 않습니다. 고르기·빈칸은 3번 틀리면 정답을 보여 주고 넘어갑니다.</div>
   </aside>
   <section class="main">
     <div class="top">
@@ -1188,17 +1195,19 @@ function withFig(pad,sc){ // 그림이 있으면 물음은 종이 맨 위에 가
 const R={};
 // 영상(mp4)이 있는 화면: 영상을 재생하고, 아래 컷 단추로 대본의 컷(at 초)으로 옮겨 간다. '📜 대본'을 누르면 컷 대본 보기(vodCuts)로 바뀐다.
 R.vod=sc=>{ if(!sc.video||window.__vodScript) return R.vodCuts(sc);
-  const st=$('#stage'); st.innerHTML=''; st.classList.add('isvod'); const box=el('div','vod vv'); st.append(box);
+  const st=$('#stage'); st.innerHTML=''; st.classList.add('isvod','vvon'); const box=el('div','vod vv'); st.append(box);
   const at=sc.cuts.map((c,k)=>c.at!=null?c.at:k*4), n=sc.cuts.length; let ci=-1;
   const tag=el('div','tag notranslate',''); const v=document.createElement('video'); v.className='vvid'; v.src=sc.video; v.muted=true; v.playsInline=true; v.controls=true; v.preload='auto';
   const ctrl=el('div','ctrl vch'), sw=el('button','','📜 대본'); sw.title='컷 대본으로 보기(업체에 전하는 컷별 대본·연출 메모)'; sw.onclick=()=>{ window.__vodScript=true; window.__cut=Math.max(0,ci); render(); };
   const bt=sc.cuts.map((c,k)=>{ const b=el('button','','컷 '+(k+1)); b.onclick=()=>{ v.currentTime=at[k]+0.05; v.play().catch(()=>{}); }; return b; });
-  ctrl.append(...bt,sw); box.append(tag,v,ctrl);
-  const sync=()=>{ let k=0; at.forEach((a,j)=>{ if(v.currentTime+0.01>=a) k=j; }); if(k===ci) return; ci=k; tag.textContent='영상 · 컷 '+(k+1)+'/'+n; bt.forEach((b,j)=>b.classList.toggle('on',j===k)); showMemo(sc,sc.cuts[k]); };
+  const info=el('div','vinfo');   // 세로 화면에서 영상 아래 빈자리에 지금 컷의 자막·대사를 보여 준다
+  ctrl.append(...bt,sw); box.append(tag,v,ctrl,info);
+  const sync=()=>{ let k=0; at.forEach((a,j)=>{ if(v.currentTime+0.01>=a) k=j; }); if(k===ci) return; ci=k; tag.textContent='영상 · 컷 '+(k+1)+'/'+n; bt.forEach((b,j)=>b.classList.toggle('on',j===k)); showMemo(sc,sc.cuts[k]); vinfo(k); };
+  const vinfo=k=>{ const c=sc.cuts[k], say=(c.bubbles||[]).map(x=>LESSON.cast[x.who]+': '+x.text); info.innerHTML='<b>컷 '+(k+1)+'</b>'+(c.caption?'<div class="vc">'+rich(c.caption)+'</div>':'')+say.map(x=>'<div class="vs">'+rich(x)+'</div>').join('')+(!c.caption&&!say.length?'<div class="vs">(자막 없음 — 글자 모션그래픽)</div>':''); };
   v.addEventListener('timeupdate',sync); v.addEventListener('seeked',sync);
   const c0=window.__cut!=null?Math.min(n-1,window.__cut):0; window.__cut=null;
   v.addEventListener('loadedmetadata',()=>{ if(c0) v.currentTime=at[c0]+0.05; v.play().catch(()=>{}); },{once:true});
-  chrome(sc); ci=-1; tag.textContent='영상 · 컷 '+(c0+1)+'/'+n; bt[c0].classList.add('on'); ci=c0; showMemo(sc,sc.cuts[c0]);
+  chrome(sc); ci=-1; tag.textContent='영상 · 컷 '+(c0+1)+'/'+n; bt[c0].classList.add('on'); ci=c0; showMemo(sc,sc.cuts[c0]); vinfo(c0);
   R._cleanup=()=>{ try{ v.pause(); }catch(e){} }; return true; };
 R.vodCuts=sc=>{
   const st=$('#stage'); st.innerHTML=''; const PK=pkey(), saved=prog.get(PK)||{}, explicit=window.__cut!=null; let ci=Math.min(sc.cuts.length-1,window.__cut!=null?window.__cut:(saved.ci||0)), timer=null; window.__cut=null;
@@ -1722,6 +1731,7 @@ function render(){
   if(R._cleanup){ R._cleanup(); R._cleanup=null; } try{speechSynthesis.cancel();}catch(e){}
   const mod=LESSON.modules[mi], sc=mod.screens[si];
   [...$('#toc').children].forEach((b,i)=>b.classList.toggle('on',i===mi));
+  $('#stage').classList.remove('vvon');
   const self=(R[sc.type]||(()=>{frame('준비 중인 유형: '+sc.type);}))(sc);
   if(!self){ chrome(sc); showMemo(sc); }
   progReplay(sc);
