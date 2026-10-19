@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>프로토타입 검토 요청</title>
+<meta name="description" content="7차시 소인수분해 프로토타입 샘플에 대한 집필진 검토 의견 요청">
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#1d2433;--sub:#5b6b8c;--line:#dfe5ef;--blue:#2f6fe4;--blue2:#e9f0ff;--orange:#f58a1f;--orange2:#fff3e3;--teal:#159b8a;--teal2:#e3f6f3;--yel:#fff6cf;--shadow:0 2px 12px rgba(20,40,80,.07)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121826;--card:#1a2233;--ink:#e7ecf6;--sub:#a3b1cc;--line:#2c3650;--blue:#6c9bff;--blue2:#1f2c4a;--orange:#ffab52;--orange2:#3a2a14;--teal:#4fd1bf;--teal2:#15302d;--yel:#3a3416;--shadow:none}}
+:root[data-theme="dark"]{--bg:#121826;--card:#1a2233;--ink:#e7ecf6;--sub:#a3b1cc;--line:#2c3650;--blue:#6c9bff;--blue2:#1f2c4a;--orange:#ffab52;--orange2:#3a2a14;--teal:#4fd1bf;--teal2:#15302d;--yel:#3a3416;--shadow:none}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Pretendard','Malgun Gothic','Apple SD Gothic Neo',system-ui,sans-serif;line-height:1.65;word-break:keep-all;overflow-wrap:break-word}
+a{color:var(--blue)}
+.wrap{max-width:900px;margin:0 auto;padding:0 16px 56px}
+header{background:linear-gradient(135deg,#1c3f8f,#2f6fe4 60%,#19a594);color:#fff;padding:40px 0 34px}
+header .wrap{padding-bottom:0}
+.kicker{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:3px 14px;font-size:14px;font-weight:700}
+h1{margin:14px 0 8px;font-size:clamp(26px,5vw,38px);line-height:1.25}
+header p{margin:0;font-size:17px;opacity:.95}
+.due{margin-top:18px;display:inline-flex;align-items:center;gap:8px;background:#fff;color:#1d2433;border-radius:12px;padding:8px 16px;font-weight:800;font-size:16px}
+.due b{color:#d9480f}
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 22px;margin-top:18px;box-shadow:var(--shadow)}
+h2{margin:0 0 12px;font-size:21px;display:flex;align-items:center;gap:8px}
+h3{margin:18px 0 6px;font-size:17px}
+.lead{font-size:16.5px}
+.btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:14px}
+.btn{display:flex;align-items:center;gap:12px;text-decoration:none;border-radius:14px;padding:16px 18px;font-weight:800;font-size:18px;color:#fff;background:var(--blue);border:0}
+.btn small{display:block;font-weight:600;font-size:13.5px;opacity:.9}
+.btn .ic{font-size:30px;line-height:1}
+.btn.alt{background:var(--teal)}
+.btn:hover{filter:brightness(1.07)}
+.video{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#0d1b38;display:flex;align-items:center;justify-content:center;color:#cfe0ff;text-align:center}
+.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.video .ph{padding:20px;font-weight:700}
+.video .ph div{font-size:44px}
+ol.steps{list-style:none;margin:6px 0 0;padding:0;counter-reset:s}
+ol.steps li{counter-increment:s;position:relative;padding:10px 0 10px 54px;border-bottom:1px dashed var(--line)}
+ol.steps li:last-child{border-bottom:0}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:9px;width:38px;height:38px;border-radius:50%;background:var(--orange);color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:19px}
+ol.steps b{font-size:16.5px}
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:8px 0 4px}
+.flow div{background:var(--blue2);border-radius:12px;padding:10px 8px;text-align:center;font-weight:800;font-size:14.5px}
+.flow div span{display:block;font-size:24px}
+@media (max-width:640px){.flow{grid-template-columns:repeat(2,1fr)}.flow div:last-child{grid-column:span 2}}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{border-bottom:1px solid var(--line);padding:9px 8px;text-align:left;vertical-align:top}
+th{width:28%;color:var(--sub);font-weight:800;white-space:nowrap}
+@media (max-width:640px){table,tbody,tr,th,td{display:block;width:100%}th{border-bottom:0;padding-bottom:0}td{padding-top:2px}}
+ul.check{list-style:none;padding:0;margin:4px 0 0}
+ul.check li{padding:7px 0 7px 32px;position:relative}
+ul.check li::before{content:'✔';position:absolute;left:4px;top:6px;color:var(--teal);font-weight:900}
+.box{border-radius:12px;padding:14px 16px;margin-top:12px}
+.box.warn{background:var(--orange2)}
+.box.info{background:var(--teal2)}
+.box.yel{background:var(--yel)}
+.parts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.parts span{border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:14px;background:var(--bg)}
+details{border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-top:8px}
+summary{cursor:pointer;font-weight:800}
+footer{color:var(--sub);font-size:14px;text-align:center;margin-top:24px}
+.copy{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:2px 10px;font:inherit;font-size:13px;cursor:pointer;margin-left:6px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <span class="kicker">KSL 중학 수학 한국어 어휘 콘텐츠 · 집필진 검토</span>
+    <h1>7차시 소인수분해<br>프로토타입 샘플 검토 요청</h1>
+    <p>모든 차시의 본보기가 될 샘플입니다. 선생님들의 의견을 모아 반영한 뒤 확정하겠습니다.</p>
+    <div class="due" id="due"></div>
+  </div>
+</header>
+<div class="wrap">
+
+  <section>
+    <h2>📮 부탁드리는 일</h2>
+    <p class="lead">아래 <b>안내 영상(약 5분)</b>을 먼저 보시고, <b>프로토타입 샘플</b>을 처음부터 끝까지 넘겨 보면서 화면마다 의견을 <b>💬 검토 의견</b> 단추로 남겨 주세요. 의견은 구글 시트에 차시·페이지·부분과 함께 자동으로 모입니다.</p>
+    <div class="btns">
+      <a class="btn" id="protoBtn" href="https://j333333766-hub.github.io/math-korean-vocab-sample/prototype/" target="_blank" rel="noopener"><span class="ic">▶</span><span>프로토타입 샘플 열기<small>7차시 소인수분해 · 24화면</small></span></a>
+      <a class="btn alt" href="https://docs.google.com/spreadsheets/d/1eIOEVhjYTogAEFeZJe3kG7yS8dbNx2yjwDJeqonQEyk/edit?usp=sharing" target="_blank" rel="noopener"><span class="ic">📄</span><span>모인 의견 보기(시트)<small>보기 전용 · 다른 선생님 의견도 보여요</small></span></a>
+    </div>
+    <div class="box info">💻 컴퓨터의 <b>크롬</b>이나 <b>엣지</b>에서 열어 주세요. 휴대폰에서도 볼 수 있지만 검토는 큰 화면을 권합니다.</div>
+  </section>
+
+  <section>
+    <h2>🎬 안내 영상</h2>
+    <div class="video" id="video"><div class="ph"><div>🎞️</div>안내 영상을 준비하고 있어요.<br>곧 이 자리에 올라옵니다.</div></div>
+  </section>
+
+  <section>
+    <h2>🧭 샘플의 다섯 단계 <span style="font-size:14px;color:var(--sub);font-weight:700">(10/19 확정 플로우)</span></h2>
+    <div class="flow">
+      <div><span>☀️</span>오늘의 어휘</div><div><span>🎬</span>뜻 알아보기</div><div><span>📖</span>교과서 맛보기</div><div><span>✏️</span>연습하기</div><div><span>✅</span>정리하기</div>
+    </div>
+    <table>
+      <tr><th>오늘의 어휘</th><td>안내 캐릭터의 말 → 앞 차시에서 배운 ‘소수’ 카드 → 오늘 낱말 세 개 듣기</td></tr>
+      <tr><th>뜻 알아보기</th><td>낱말마다 <b>생활 속 뜻 영상</b> → 뜻 카드 → 2번 따라 읽기 (소인수 · 소인수분해 · 거듭제곱)</td></tr>
+      <tr><th>교과서 맛보기</th><td>두 친구의 짧은 대화로 교과서 꼴 문장 만나기 → 교과서 문제 문장 소리 내어 읽기(풀지 않음)</td></tr>
+      <tr><th>연습하기</th><td>그림 보고 고르기 · 듣고 고르기 · 빈칸 채우기(보기) · 손글씨 1개 · 따라 말하기</td></tr>
+      <tr><th>정리하기</th><td>오늘 낱말 다시 보기, ‘다시 볼래요’를 누르면 생활 속 뜻으로 돌아감</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>💬 검토 의견 남기는 방법</h2>
+    <ol class="steps">
+      <li><b>검토 의견 단추</b> — 의견을 남길 화면에서 위쪽 <b>💬 검토 의견</b>을 누르면 오른쪽에 칸이 열립니다. 차시와 페이지는 저절로 적힙니다.</li>
+      <li><b>이름 · 비밀번호</b> — 이름을 적고 ‘다음’. 처음이면 비밀번호를 정합니다(4자 이상). <b>모든 차시에서 같은 비밀번호</b>를 쓰니 꼭 기억해 주세요.</li>
+      <li><b>부분 고르기</b> — 칸이 열려 있으면 화면 위에 번호가 보여요. 번호를 눌러도 골라집니다. ‘자세한 위치’(예: 두 번째 말풍선)도 적을 수 있어요.
+        <div class="parts"><span>① 화면 전체</span><span>② 지시문</span><span>③ 낱말 뜻·설명</span><span>④ 용례(문장·대화)</span><span>⑤ 그림·영상 연출</span><span>⑥ 대사·내레이션</span><span>⑦ 활동(보기·정답)</span><span>⑧ 쓰기·말하기</span><span>⑨ 오개념</span><span>⑩ 기타</span></div></li>
+      <li><b>의견 쓰고 기록하기</b> — ‘기록하기’를 누르면 시트에 한 줄로 기록됩니다. 한 페이지에 여러 건을 남겨도 되고, 칸을 연 채로 다음 화면으로 넘어가도 됩니다.</li>
+      <li><b>내 의견 확인 · 고치기</b> — 칸 아래 목록에서 내가 남긴 의견을 보고 <b>✏️ 고치기</b>로 고칠 수 있어요.</li>
+    </ol>
+    <div class="box yel">🎬 <b>생활 속 뜻 영상</b> 화면에서는 몇 번째 컷, 영상 몇 분 몇 초 지점인지까지 함께 기록됩니다. 의견을 남길 장면에서 영상을 멈춘 뒤 적어 주세요.</div>
+    <div class="box info">📚 특정 화면이 아니라 <b>집필진 모두에게</b> 하고 싶은 말(예: “뜻 카드는 이런 말투로 쓰자”)은 의견 칸 위쪽 <b>‘전체 지침 의견’</b> 탭에 남겨 주세요.</div>
+    <div class="box warn">⚠️ <b>시험 삼아 의견을 남기지 말아 주세요.</b> 남긴 의견은 시트에 그대로 쌓입니다. 잘못 남겼다면 ✏️ 고치기로 내용을 고쳐 주세요.</div>
+  </section>
+
+  <section>
+    <h2>🔍 이런 점을 봐 주세요</h2>
+    <ul class="check">
+      <li><b>생활 속 뜻 장면</b>이 낱말 뜻을 잘 보여 주나요? 더 좋은 생활 장면이 있나요?</li>
+      <li><b>오개념</b>이 생길 만한 곳은 없나요? (그림, 예, 뜻풀이)</li>
+      <li><b>뜻 카드 문장</b>이 학생 수준(초등 4~6학년 한국어)에 맞나요?</li>
+      <li><b>대화와 지시문</b>이 자연스럽나요? 교과서 꼴 문장이 너무 어렵거나 길지 않나요?</li>
+      <li><b>연습 활동</b>의 종류·순서·분량이 알맞나요? 10분 안팎으로 볼 수 있나요?</li>
+      <li>앞으로 <b>내가 맡은 차시도 이 틀로 만들 수 있을지</b>, 어려워 보이는 점은 무엇인가요?</li>
+    </ul>
+    <details>
+      <summary>이번 검토에서 보지 않으셔도 되는 것</summary>
+      <ul class="check">
+        <li>인물 그림(아미르·유나)은 <b>임시</b>입니다. 업체가 중학교용 캐릭터를 새로 그립니다.</li>
+        <li>영상은 대표 교사가 만든 <b>시안</b>(소리 없음)입니다. 실제 영상은 업체가 만듭니다. 장면의 내용·순서·자막 위주로 봐 주세요.</li>
+        <li>지시문 아래 청록 띠의 <b>번역</b>은 시안용 임시 번역입니다(⚙ 설정에서 언어를 바꿔 볼 수 있어요).</li>
+        <li>화면 색·단추 모양 같은 디자인 세부는 업체 화면(작년 초등 스토리보드)을 본뜬 것이라 바뀔 수 있습니다.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section>
+    <h2>❓ 자주 묻는 것</h2>
+    <details><summary>비밀번호를 잊어버렸어요</summary><p>대표 교사(조창현)에게 알려 주세요. 지운 뒤 다시 정할 수 있어요.</p></details>
+    <details><summary>다른 기기에서 이어서 하고 싶어요</summary><p>같은 이름과 비밀번호를 넣으면 어느 기기에서든 내가 남긴 의견이 보이고 고칠 수 있어요.</p></details>
+    <details><summary>‘서버에 연결하지 못했어요’가 나와요</summary><p>인터넷 연결을 확인하고 ‘기록하기’를 다시 눌러 주세요. 적은 글은 그대로 남아 있어요.</p></details>
+    <details><summary>화면 위쪽 ‘🤖 지침 묻기’는 뭔가요?</summary><p>회의록·확정 사항·지침을 근거로 AI에게 묻는 칸입니다. 접속 암호는 키트의 <b>내 설정.txt</b>에 있어요. AI 답은 틀릴 수 있으니 답 끝의 [자료 이름]을 확인해 주세요.</p></details>
+  </section>
+
+  <footer>KSL 중학 수학 한국어 어휘 콘텐츠 개발 · 대표 교사 조창현 · 2026. 10.</footer>
+</div>
+<script>
+/* ── 여기 두 줄만 고치면 됩니다 ───────────────────────────────
+   YT  : 안내 영상의 유튜브 주소(https://youtu.be/… 또는 https://www.youtube.com/watch?v=…). 비워 두면 ‘준비 중’이 보입니다.
+   DUE : 검토 기한. 비워 두면 기한 줄이 숨겨집니다.                                        */
+const YT = 'https://youtu.be/q4ovtJCxOEY';
+const DUE = '';
+/* ────────────────────────────────────────────────────────── */
+(function(){
+  const d=document.getElementById('due');
+  if(DUE){ d.innerHTML='🗓️ 검토 기한: <b>'+DUE+'</b>'; } else d.style.display='none';
+  const m=String(YT).match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/);
+  if(m){ const v=document.getElementById('video'); v.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+m[1]+'?rel=0" title="프로토타입 검토 안내 영상" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'; }
+})();
+</script>
+</body>
+</html>
