@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>인터랙티브 유형 보기</title>
+<style>
+:root{--ink:#1d2433;--sub:#5b6478;--line:#d9dee8;--bg:#f4f6fa;--card:#fff;--blue:#2f6fe4;--teal:#13a089;--yellow:#f5b400;--red:#e24b4b;--ok:#0a8f5b;--hl:#fff1b8;--chip:#eef3ff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#e8ecf4;--sub:#a9b2c4;--line:#39404f;--bg:#161a22;--card:#1f2430;--chip:#2a3550;--hl:#4a3f12}}
+:root[data-theme="dark"]{--ink:#e8ecf4;--sub:#a9b2c4;--line:#39404f;--bg:#161a22;--card:#1f2430;--chip:#2a3550;--hl:#4a3f12}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Pretendard","Malgun Gothic",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:10px 16px}
+header h1{margin:0;font-size:19px}header p{margin:2px 0 0;color:var(--sub);font-size:13px}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.filters button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:3px 12px;cursor:pointer}
+.filters button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.wrap{display:grid;grid-template-columns:200px 1fr;gap:16px;max-width:1280px;margin:0 auto;padding:16px}
+nav{position:sticky;top:110px;align-self:start;max-height:calc(100vh - 130px);overflow:auto;font-size:13px}
+nav h4{margin:10px 0 4px;font-size:12px;color:var(--sub)}
+nav a{display:block;padding:2px 6px;border-radius:6px;color:var(--ink);text-decoration:none}nav a:hover{background:var(--chip)}
+nav a .s{float:right;font-size:11px}
+.intro{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.intro table{border-collapse:collapse;font-size:13px;margin-top:6px}.intro td,.intro th{border:1px solid var(--line);padding:3px 8px;text-align:left}
+.type{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:0 0 16px;overflow:hidden;scroll-margin-top:120px}
+.type.hide{display:none}
+.th{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line)}
+.code{font-weight:900;font-size:17px;background:var(--ink);color:var(--card);border-radius:8px;padding:1px 10px}
+.name{font-weight:800}
+.badge{font-size:12px;border-radius:99px;padding:1px 9px;border:1px solid var(--line)}
+.b-ok{background:#e3f6ec;color:#0a6b3d;border-color:#9ad8b5}.b-mid{background:#fff4d6;color:#7a5600;border-color:#f0d27a}.b-no{background:#fde8e8;color:#9b1c1c;border-color:#f3b4b4}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .b-ok{background:#123d29;color:#9ae6b4}:root:not([data-theme="light"]) .b-mid{background:#3d3210;color:#f6d777}:root:not([data-theme="light"]) .b-no{background:#3d1717;color:#f5a3a3}}
+.tb{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:0}
+.info{padding:12px 14px;border-right:1px solid var(--line);font-size:14px}
+.info dl{margin:0;display:grid;grid-template-columns:86px 1fr;gap:4px 8px}.info dt{color:var(--sub);font-size:13px}.info dd{margin:0}
+.sb{margin-top:10px;font-size:12px;overflow-x:auto}.sb table{border-collapse:collapse;min-width:100%}.sb td,.sb th{border:1px solid var(--line);padding:2px 6px;white-space:nowrap}.sb th{background:var(--chip);font-weight:700}
+details{margin-top:8px;font-size:13px}details img{max-width:100%;border:1px solid var(--line);border-radius:6px;margin-top:6px;background:#000}
+.demo{padding:12px 14px;background:linear-gradient(#eaf3fd,#f6fafe);color:#1d2433}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .demo{background:linear-gradient(#1b2636,#18202c);color:#e8ecf4}}
+.dq{background:var(--blue);color:#fff;border-radius:10px;padding:6px 12px;font-weight:800;text-align:center;margin-bottom:8px}
+.stage{background:#fff;color:#1d2433;border:2px solid #1d2433;border-radius:12px;padding:12px;min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;position:relative}
+.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
+.btn,.opt,.chip{font:inherit;cursor:pointer;border:2px solid #1d2433;background:#fff;color:#1d2433;border-radius:10px;padding:6px 14px;font-weight:800}
+.opt.sel,.chip.sel{background:var(--hl)}.opt.right{background:#d8f5e5;border-color:var(--ok)}.opt.wrong{background:#fde2e2;border-color:var(--red)}
+.chip{background:var(--chip);border-radius:99px;padding:4px 14px;touch-action:none}.chip.used{opacity:.35;pointer-events:none}
+.btn.blue{background:var(--blue);color:#fff;border-color:var(--blue)}
+.fb{min-height:22px;font-weight:800;font-size:14px;text-align:center}.fb.ok{color:var(--ok)}.fb.no{color:var(--red)}
+.fig{font-weight:900;font-size:26px;background:#fff7dc;border:1px solid #e6c96a;border-radius:10px;padding:6px 16px}
+.fig.s{font-size:18px}
+.pic{width:120px;height:84px;border:2px solid #1d2433;border-radius:10px;background:#fff7dc;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;text-align:center;line-height:1.2;cursor:pointer;flex-direction:column}
+.pic small{font-size:11px;font-weight:600;color:#5b6478}
+.slot{display:inline-flex;min-width:90px;min-height:34px;border:2px dashed #8a93a6;border-radius:8px;vertical-align:middle;align-items:center;justify-content:center;padding:0 8px;margin:0 3px;background:#f7f9fc;font-weight:800}
+.slot.fill{border-style:solid;border-color:var(--blue);background:#eaf1ff}
+.bins{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}.bin{min-width:170px;min-height:90px;border:3px solid #1d2433;border-radius:14px;padding:6px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;justify-content:center}
+.bin b{width:100%;text-align:center}.bin.a{background:#fff3d6}.bin.b{background:#dcecff}
+.sent{font-size:18px;font-weight:700;line-height:2.2;text-align:center}
+.word{cursor:pointer;border-radius:6px;padding:1px 3px}.word.sel{background:var(--hl);outline:2px solid var(--yellow)}.word.right{background:#d8f5e5}.word.wrong{background:#fde2e2}
+.pad{position:relative;border:2px solid #1d2433;border-radius:10px;background:#fff}
+.pad canvas{display:block;touch-action:none;cursor:crosshair}
+.pad .ghost{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;color:#d4d9e3;pointer-events:none;letter-spacing:6px}
+.cells{display:flex;gap:4px}.cell{width:90px;height:90px}
+.say{display:flex;align-items:center;gap:10px;border:2px solid #1d2433;border-radius:10px;padding:5px 12px;background:#fff;font-weight:800;min-width:260px;justify-content:space-between}
+.round{width:34px;height:34px;border-radius:50%;border:none;background:var(--blue);color:#fff;font-size:16px;cursor:pointer}
+.dots i{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid #1d2433;margin-left:3px}.dots i.on{background:var(--yellow)}
+.lt{position:relative;display:flex;gap:110px;justify-content:center}.lt .col{display:flex;flex-direction:column;gap:10px}.lt svg{position:absolute;inset:0;pointer-events:none;overflow:visible}
+.card{width:120px;height:80px;perspective:400px;cursor:pointer}.card .in{position:relative;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}.card.flip .in{transform:rotateY(180deg)}
+.card .f,.card .b{position:absolute;inset:0;backface-visibility:hidden;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;border:2px solid #1d2433;text-align:center;font-size:14px;padding:4px}
+.card .f{background:var(--teal);color:#fff;font-size:16px}.card .b{background:#eafaf5;transform:rotateY(180deg)}
+.card.done .f,.card.done .b{border-color:var(--ok)}
+.bub{position:relative;background:#fff;border:2px solid #1d2433;border-radius:14px;padding:6px 12px;font-weight:700;max-width:360px}
+.who{width:46px;height:46px;border-radius:50%;background:#e6f8ec;border:2px solid #1d2433;display:flex;align-items:center;justify-content:center;font-size:22px;flex:none}
+.rec{display:flex;align-items:center;gap:8px;background:#f2735f;border-radius:10px;padding:6px 10px;color:#fff;font-weight:800}
+.rec button{font:inherit;border:none;border-radius:99px;padding:4px 12px;cursor:pointer;font-weight:800}
+.coin{position:absolute;right:8px;top:6px;font-size:12px;font-weight:800;background:#fff1b8;border:1px solid #e6c96a;border-radius:99px;padding:0 8px;opacity:0;transition:opacity .3s}.coin.on{opacity:1}
+.tip{font-size:12px;color:#5b6478}
+.pop{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;border:2px solid #1d2433;border-radius:12px;padding:10px 14px;max-width:320px;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:2;font-size:14px}
+.kb{font-size:22px}
+main{min-width:0}.intro table{width:100%}.say{max-width:100%}
+@media (max-width:900px){header{position:static}.wrap{grid-template-columns:minmax(0,1fr)}.say{min-width:0!important;flex-wrap:wrap}nav{display:none}.tb{grid-template-columns:minmax(0,1fr)}.lt{gap:28px}.lt .opt{max-width:40vw;white-space:normal}.info{border-right:none;border-bottom:1px solid var(--line)}}
+@media (max-width:520px){.lt{gap:40px}.pic{width:96px}.card{width:100px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>업체 인터랙티브 유형 보기 — 우리 내용으로 직접 해 보기</h1>
+  <p>원고집필 템플릿 ‘참고_인터렉티브’ 시트의 유형(쓰기1~7·드래그 앤 드롭1~8·클릭1~12·녹음1~5·추가)과 2025 수학 화면에만 있는 유형(쓰기8·드래그8-2·클릭13·14)을 7차시 소인수분해 낱말로 만들었습니다. 업체 예시 그림은 사업 내부 자료라 이 공개 판에서는 뺐습니다.</p>
+  <div class="filters" id="filters"></div>
+</header>
+<div class="wrap">
+  <nav id="nav"></nav>
+  <main>
+    <div class="intro">
+      <b>이 페이지 쓰는 법</b> — 원고를 쓸 때 “이 내용을 어떤 유형으로 만들까?”를 고르는 데 씁니다. 카드마다 <b>왼쪽</b>은 업체 설명·우리 틀 지원·쓰는 단계·스토리보드 시트에 적는 법, <b>오른쪽</b>은 우리 내용으로 만든 동작 예시입니다(누르고, 끌고, 쓰고, 말해 보세요).
+      <table>
+        <tr><th>공통 규칙</th><td>기회 = 보기 수 − 1(최대 3번) · 틀리면 “한 번 더 풀어볼까요?”, 기회를 다 쓰면 “정답을 확인해 보세요.”, 맞히면 “참 잘했어요!” · 보상: 쓰기 유형 쓰기 1점, 드래그·클릭 읽기 1점, 녹음 말하기 1점, 듣기(클릭2) 듣기·말하기 1점</td></tr>
+        <tr><th>우리 틀 표시</th><td><span class="badge b-ok">✅ 틀에 있음</span> 지금 프로토타입 틀이 그대로 그림 · <span class="badge b-mid">△ 비슷하게</span> 비슷한 화면이 있음(조금 고치면 됨) · <span class="badge b-no">✗ 없음</span> 새로 만들어야 함</td></tr>
+        <tr><th>스토리보드</th><td>각 카드의 ‘스토리보드 시트에 적기’ 표가 업체 엑셀 ‘스토리보드’ 시트의 F(내용 종류)~P(보상) 칸입니다. 페이지 첫 행은 ‘화면’ 행(캡처), 그 아래 지시문 행과 이 행을 적습니다.</td></tr>
+      </table>
+    </div>
+    <div id="list"></div>
+  </main>
+</div>
+<script>
+const IMG = {};
+// ── 공용 도우미 ──────────────────────────────────────────
+const $ = (s, r = document) => r.querySelector(s);
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const speak = (t, done) => { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang = 'ko-KR'; u.rate = 0.9; if (done) u.onend = done; speechSynthesis.speak(u); } catch (e) { done && done(); } };
+// SB 규칙의 채점: 기회 = 보기 수 − 1(최대 3번)
+function judge(box, nOpt, coinTxt) {
+  const tries = Math.max(1, Math.min(3, (nOpt || 2) - 1)); let used = 0, over = false;
+  const fb = el('div', 'fb'); box.append(fb);
+  const coin = el('div', 'coin', '🪙 ' + (coinTxt || '읽기 1점')); box.closest('.stage').append(coin);
+  return {
+    tries, reset() { used = 0; over = false; fb.textContent = ''; fb.className = 'fb'; coin.classList.remove('on'); },
+    check(ok, showAnswer) {
+      if (over) return true;
+      if (ok) { fb.textContent = '참 잘했어요!'; fb.className = 'fb ok'; over = true; coin.classList.add('on'); return true; }
+      used++;
+      if (used >= tries) { fb.textContent = '정답을 확인해 보세요.'; fb.className = 'fb no'; over = true; showAnswer && showAnswer(); return true; }
+      fb.textContent = `한 번 더 풀어볼까요? (남은 기회 ${tries - used}번)`; fb.className = 'fb no'; return false;
+    }, msg(t, ok) { fb.textContent = t; fb.className = 'fb ' + (ok ? 'ok' : ''); }, coin() { coin.classList.add('on'); }
+  };
+}
+// 손글씨 판
+function pad(w, h, ghost, size) {
+  const p = el('div', 'pad'); p.style.width = w + 'px'; p.style.height = h + 'px';
+  if (ghost) { const g = el('div', 'ghost', ghost); g.style.fontSize = (size || Math.min(h * .62, w / Math.max(1, ghost.length) * .9)) + 'px'; p.append(g); }
+  const c = el('canvas'); c.width = w * 2; c.height = h * 2; c.style.width = w + 'px'; c.style.height = h + 'px'; p.append(c);
+  const x = c.getContext('2d'); x.scale(2, 2); x.lineWidth = 5; x.lineCap = 'round'; x.strokeStyle = '#1d2433'; let on = false, n = 0;
+  const pos = e => { const r = c.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  c.onpointerdown = e => { on = true; c.setPointerCapture(e.pointerId); const [a, b] = pos(e); x.beginPath(); x.moveTo(a, b); };
+  c.onpointermove = e => { if (!on) return; const [a, b] = pos(e); x.lineTo(a, b); x.stroke(); n++; };
+  c.onpointerup = () => { on = false; };
+  p.clear = () => { x.clearRect(0, 0, w, h); n = 0; }; p.strokes = () => n; return p;
+}
+// 끌어 놓기(눌러서 고른 뒤 눌러 놓기도 됨): chips → targets(slot/bin)
+function dnd(chips, targets, onDrop) {
+  let pick = null;
+  chips.forEach(c => {
+    c.draggable = true; c.ondragstart = e => { e.dataTransfer.setData('text', c.dataset.v); pick = c; };
+    c.onclick = () => { chips.forEach(o => o.classList.remove('sel')); if (pick === c) { pick = null; return; } pick = c; c.classList.add('sel'); };
+  });
+  targets.forEach(t => {
+    t.ondragover = e => e.preventDefault();
+    t.ondrop = e => { e.preventDefault(); if (pick) onDrop(pick, t); pick = null; chips.forEach(o => o.classList.remove('sel')); };
+    t.onclick = () => { if (pick) { onDrop(pick, t); pick = null; chips.forEach(o => o.classList.remove('sel')); } };
+  });
+}
+function checkRow(box, onCheck, onReset) {
+  const r = el('div', 'row'); const ok = el('button', 'btn blue', '↵ 확인'); ok.onclick = onCheck; r.append(ok);
+  if (onReset) { const re = el('button', 'btn', '↺ 다시'); re.onclick = onReset; r.append(re); } box.append(r);
+}
+// 선 잇기(왼쪽 → 오른쪽)
+function lines(box, left, right, answer, coinTxt) {
+  const lt = el('div', 'lt'), L = el('div', 'col'), R = el('div', 'col'); const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); const map = {}; let cur = null;
+  const draw = () => { svg.innerHTML = ''; const br = lt.getBoundingClientRect(); for (const i in map) { const a = L.children[i].getBoundingClientRect(), b = R.children[map[i]].getBoundingClientRect(); const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line'); ln.setAttribute('x1', a.right - br.left); ln.setAttribute('y1', a.top + a.height / 2 - br.top); ln.setAttribute('x2', b.left - br.left); ln.setAttribute('y2', b.top + b.height / 2 - br.top); ln.setAttribute('stroke', '#2f6fe4'); ln.setAttribute('stroke-width', '4'); svg.append(ln); } };
+  left.forEach((t, i) => { const b = typeof t === 'string' ? el('button', 'opt', t) : t; b.onclick = () => { cur = i; [...L.children].forEach((c, k) => c.classList.toggle('sel', k === i)); }; L.append(b); });
+  right.forEach((t, j) => { const b = typeof t === 'string' ? el('button', 'opt', t) : t; b.onclick = () => { if (cur == null) return; for (const k in map) if (map[k] === j) delete map[k]; map[cur] = j; cur = null; [...L.children].forEach(c => c.classList.remove('sel')); draw(); }; R.append(b); });
+  lt.append(L, R, svg); box.append(lt); const j = judge(box, left.length, coinTxt);
+  checkRow(box, () => j.check(answer.every((a, i) => map[i] === a), () => { answer.forEach((a, i) => map[i] = a); draw(); }), () => { for (const k in map) delete map[k]; draw(); j.reset(); });
+  new ResizeObserver(draw).observe(lt);
+}
+// 녹음(마이크) — 브라우저가 허락하지 않으면 안내만
+function recorder(box, label) {
+  const r = el('div', 'rec'); const b = el('button', '', '🎙 ' + (label || '녹음')); const pl = el('button', '', '▶ 들어 보기'); pl.disabled = true; const st = el('span', '', '');
+  let mr = null, chunks = [], url = null;
+  b.onclick = async () => {
+    if (mr && mr.state === 'recording') { mr.stop(); return; }
+    try { const s = await navigator.mediaDevices.getUserMedia({ audio: true }); mr = new MediaRecorder(s); chunks = []; mr.ondataavailable = e => chunks.push(e.data);
+      mr.onstop = () => { s.getTracks().forEach(t => t.stop()); url = URL.createObjectURL(new Blob(chunks)); pl.disabled = false; b.textContent = '🎙 다시 녹음'; st.textContent = '녹음했어요'; box.closest('.stage').querySelector('.coin')?.classList.add('on'); };
+      mr.start(); b.textContent = '■ 멈추기'; st.textContent = '녹음 중…';
+    } catch (e) { st.textContent = '(이 브라우저에서는 마이크를 쓸 수 없어요 — 실제 콘텐츠에서는 녹음됩니다)'; box.closest('.stage').querySelector('.coin')?.classList.add('on'); }
+  };
+  pl.onclick = () => { if (url) new Audio(url).play(); };
+  r.append(b, pl, st); box.append(r);
+  const coin = el('div', 'coin', '🪙 말하기 1점'); box.closest('.stage').append(coin);
+}
+const sayRow = (text, read, dots = true) => { const s = el('div', 'say'); let n = 0; const d = el('span', 'dots', '<i></i><i></i>'); const b = el('button', 'round', '🔊');
+  b.onclick = () => speak(read || text.replace(/<[^>]+>/g, ''), () => { n = Math.min(2, n + 1); [...d.children].forEach((x, i) => x.classList.toggle('on', i < n)); });
+  s.append(el('span', '', text), el('span', 'row', ''), dots ? d : el('span')); s.children[1].append(b); return s; };
+const shuffle = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(v => v[1]);
+
+// ── 유형 목록 ──────────────────────────────────────────
+// s: ok/mid/no, ours: 우리 틀 화면·원고 도우미, stage: 쓰는 단계, use: 판단, sb: 스토리보드 칸 [F, G, 보기[], 정답, 기회, 보상]
+const T = [
+ {code:'쓰기1', g:'쓰기', name:'연필을 눌러 글씨 쓰기(AI 쓰기)', v:'연필 클릭해 글씨 써보기 · 예: 정답 ‘학교’, 기회 3번, 쓰기 1점', s:'ok', ours:'ocr 손글씨 · handwrite(\'낱말\')', stage:'연습하기', use:'씀 — 필수어휘 하나만(10/18 결정)', img:'00_쓰기1',
+  sb:['쓰기1','소인수분해',[],'','','쓰기1점'], q:'연필을 클릭해 낱말을 써 보세요.', demo:'write1'},
+ {code:'쓰기2', g:'쓰기', name:'점과 점을 이어 글씨 쓰기', v:'점과 점을 이어 글씨 써보기 · 쓰기 1점', s:'no', ours:'없음', stage:'—', use:'중학교는 쓰지 않음(한글 글자 익히기용)', img:'01_쓰기2', sb:['쓰기2','소수',[],'','','쓰기1점'], q:'점과 점을 이어 글씨를 따라 써 보세요.', demo:'write2'},
+ {code:'쓰기3', g:'쓰기', name:'그냥 글씨 쓰기(칸)', v:'그냥 글씨 써보기', s:'mid', ours:'ocr 과 비슷(칸마다 쓰기)', stage:'연습하기', use:'쓰기1로 충분', img:'02_쓰기3', sb:['쓰기3','소인수',[],'','','쓰기1점'], q:'칸에 낱말을 써 보세요.', demo:'write3'},
+ {code:'쓰기4', g:'쓰기', name:'그림 보고 문장 빈칸에 연필로 쓰기', v:'그림을 보고 문장 빈칸에 연필을 클릭해 글씨 써보기 · 예: 횡단보도, 기회 3번', s:'no', ours:'없음(쓰기1 + 빈칸)', stage:'연습하기', use:'필요하면 추가', img:'03_쓰기4', sb:['쓰기4','[그림] 6 = 2 × 3 / 6을 (    )하면 6 = 2 × 3입니다.',[],'소인수분해','3번','쓰기1점'], q:'그림을 보고 빈칸에 알맞은 낱말을 써 보세요.', demo:'write4'},
+ {code:'쓰기5', g:'쓰기', name:'그림 보고 문장 빈칸에 타이핑', v:'그림을 보고 문장 빈칸에 타이핑으로 글씨 써보기 · 예: 급식실, 기회 3번', s:'ok', ours:'input · listen 타자(dictation)', stage:'연습하기', use:'씀', img:'04_쓰기5', sb:['쓰기5','[그림] 2³ / 2³은 2의 (    )입니다.',[],'거듭제곱','3번','쓰기1점'], q:'그림을 보고 빈칸에 알맞은 낱말을 써 보세요.', demo:'write5'},
+ {code:'쓰기6', g:'쓰기', name:'타이핑하거나 쓴 글 사진 올리기', v:'타이핑으로 글씨를 쓰거나 내가 쓴 글을 사진 찍어 올려 수정하기 · 쓰기 1점', s:'no', ours:'없음', stage:'—', use:'쓰지 않음(10분 차시에 무거움)', img:'05_쓰기6', sb:['쓰기6','배운 낱말로 문장 쓰기',[],'','','쓰기1점'], q:'배운 낱말을 가지고 문장을 써 볼까요?', demo:'write6'},
+ {code:'쓰기7', g:'쓰기', name:'빈칸 타이핑', v:'빈칸에 해당하는 내용 타이핑으로 글 쓰기 · 예: 안녕하세요., 기회 3번', s:'ok', ours:'listen 타자 · dictation([...])', stage:'연습하기', use:'씀(듣고 받아쓰기)', img:'06_쓰기7', sb:['쓰기7','(듣기) 6을 (    )하면 6 = 2 × 3입니다.',[],'소인수분해','3번','쓰기1점'], q:'문장을 듣고 빈칸에 들어갈 낱말을 써 보세요.', demo:'write7'},
+ {code:'쓰기8', g:'쓰기', name:'어휘 보고 타이핑(2025 화면)', v:'어휘를 보고 그대로 타이핑', s:'ok', ours:'listen 타자 · type_words([...])', stage:'연습하기', use:'씀', img:'2025_쓰기8', sb:['쓰기8','소인수분해 / 거듭제곱',[],'','','쓰기1점'], q:'낱말을 보면서 따라 써 보세요.', demo:'write8'},
+ {code:'드래그1', g:'드래그', name:'보기 어휘를 끌어 분류하기', v:'보기에서 해당하는 어휘를 골라 드래그 앤 드롭 · 예: 봄/겨울 바구니, 기회 3번', s:'mid', ours:'sort(단추로 분류, 수행어 차시용) — 바구니 모양으로 고치면 좋음', stage:'연습하기', use:'수 분류에 좋음', img:'07_드래그1', sb:['드래그 앤 드롭1','소수 / 합성수 바구니',['2','3','4','5','6','9'],'소수: 2, 3, 5\n합성수: 4, 6, 9','3번','읽기1점'], q:'수를 끌어 알맞은 바구니에 넣어 보세요.', demo:'drag1'},
+ {code:'드래그2', g:'드래그', name:'그림을 끌어 분류하기', v:'보기에서 해당하는 그림을 골라 드래그 앤 드롭', s:'no', ours:'없음', stage:'연습하기', use:'기하 차시(도형 분류)에 필요 → 추가 후보', img:'08_드래그2', sb:['드래그 앤 드롭2','소인수분해 / 거듭제곱 바구니',['[그림] 6 = 2 × 3','[그림] 2 × 2 × 2 = 2³','[그림] 10 = 2 × 5','[그림] 5 × 5 = 5²'],'소인수분해: 1, 3\n거듭제곱: 2, 4','3번','읽기1점'], q:'그림을 끌어 알맞은 바구니에 넣어 보세요.', demo:'drag2'},
+ {code:'드래그3', g:'드래그', name:'어휘를 끌어 문장 완성', v:'어휘 드래그 앤 드롭해 문장 완성 · 예: 할아버지께서 계세요', s:'ok', ours:'drag_drop · fill(\'…{0}…\', [...], [...])', stage:'연습하기', use:'씀(기본 빈칸)', img:'09_드래그3', sb:['드래그 앤 드롭3','6을 (    )하면 6 = 2 × 3입니다.',['소인수분해','거듭제곱'],'소인수분해','1번','읽기1점'], q:'보기에서 알맞은 낱말을 골라 빈칸에 넣어 보세요.', demo:'drag3'},
+ {code:'드래그4', g:'드래그', name:'어휘를 끌어 긴 문장 완성', v:'어휘 드래그 앤 드롭해 긴 문장 완성', s:'ok', ours:'drag_drop(빈칸 여러 개) · fill', stage:'연습하기', use:'씀', img:'10_드래그4', sb:['드래그 앤 드롭4','6을 (    )하면 6 = 2 × 3입니다. 2와 3은 6의 (    )입니다. 2³은 2의 (    )입니다.',['소인수','소인수분해','거듭제곱'],'소인수분해\n소인수\n거듭제곱','2번','읽기1점'], q:'보기에서 알맞은 낱말을 골라 빈칸에 넣어 보세요.', demo:'drag4'},
+ {code:'드래그5', g:'드래그', name:'그림을 순서대로', v:'그림을 순서대로 드래그 앤 드롭 · 예: 3-2-1-4', s:'no', ours:'없음', stage:'뜻 알아보기 뒤 확인', use:'거의 안 씀(풀이 절차 순서는 넣지 않음). 생활 장면 이야기 순서 정도', img:'11_드래그5', sb:['드래그 앤 드롭5','블록 분해 이야기 순서',['[그림] 흩어진 블록','[그림] 쌓인 블록','[그림] 흔들리는 블록'],'2-3-1','2번','읽기1점'], q:'이야기 순서대로 그림을 놓아 보세요.', demo:'drag5'},
+ {code:'드래그6', g:'드래그', name:'낱말을 순서대로(문장 만들기)', v:'낱말 순서대로 드래그 앤 드롭 · 예: 어제 저녁-오늘 아침-…', s:'no', ours:'없음', stage:'교과서 맛보기·연습하기', use:'용례 문장 만들기에 좋음 → 추가 후보 1순위', img:'12_드래그6', sb:['드래그 앤 드롭6','용례 문장 만들기',['6 = 2 × 3입니다.','6을','소인수분해하면'],'6을-소인수분해하면-6 = 2 × 3입니다.','2번','읽기1점'], q:'낱말을 순서대로 놓아 문장을 만들어 보세요.', demo:'drag6'},
+ {code:'드래그7', g:'드래그', name:'문장(어휘)과 문장 잇기', v:'문장(어휘)과 문장(어휘) 연결하기 · 2쌍이면 기회 1번', s:'ok', ours:'linetoline(누르면 이어짐) — 원고 도우미 없음', stage:'연습하기', use:'도우미 함수만 만들면 바로 씀', img:'', sb:['드래그 앤 드롭7','낱말 ↔ 뜻',['소인수분해','거듭제곱','같은 수를 여러 번 곱한 것','자연수를 소인수의 곱으로 나타내는 것'],'소인수분해-자연수를 소인수의 곱으로…\n거듭제곱-같은 수를 여러 번 곱한 것','1번','읽기1점'], q:'알맞은 것끼리 연결해 보세요.', demo:'drag7'},
+ {code:'드래그8', g:'드래그', name:'그림과 문장(어휘) 잇기', v:'그림과 문장(어휘) 연결하기', s:'ok', ours:'linetoline(왼쪽에 그림) — 원고 도우미 없음', stage:'연습하기', use:'위와 같음', img:'2025_드래그8', sb:['드래그 앤 드롭8','그림 ↔ 낱말',['[그림] 2 × 2 × 2 = 2³','[그림] 12 = 2 × 2 × 3','소인수분해','거듭제곱'],'[그림]2³-거듭제곱\n[그림]12-소인수분해','1번','읽기1점'], q:'그림에 알맞은 낱말을 연결해 보세요.', demo:'drag8'},
+ {code:'드래그8-2', g:'드래그', name:'자음·모음을 이어 낱말 만들기(2025 화면)', v:'자음·모음 연결해 낱말 만들기', s:'no', ours:'없음', stage:'—', use:'쓰지 않음(한글 익히기용)', img:'2025_드래그8-2', sb:['추가1','자모 → 낱말',['ㄱ','ㅓ','ㄷ','ㅡ','ㅂ'],'거듭','',''], q:'자음과 모음을 이어 낱말을 만들어 보세요.', demo:'drag82'},
+ {code:'클릭1', g:'클릭', name:'눌러서 어휘 확인하기(그림 + 낱말)', v:'클릭해서 어휘 확인하기 · 그림을 누르면 낱말(높임말/반말)', s:'ok', ours:'card_flip · card(...)', stage:'오늘의 어휘·뜻 알아보기', use:'씀', img:'2025_클릭1', sb:['클릭1','[그림] 카드 3장',['6 = 2 × 3','2 × 2 × 2 = 2³','2, 3, 5, 7'],'','','읽기1점'], q:'그림을 클릭해 낱말을 확인해 보세요.', demo:'click1'},
+ {code:'클릭2', g:'클릭', name:'스피커를 눌러 문장(어휘) 듣기', v:'스피커 단추 클릭해서 문장(어휘) 듣기', s:'ok', ours:'listen · read, book([...])', stage:'뜻 알아보기·교과서 맛보기', use:'씀(2번 따라 읽기, 교과서 문장 읽기)', img:'2025_클릭2', sb:['클릭2','다음 낱말을 듣고 2번 따라 읽어 보세요.',['소인수분해','6을 소인수분해하면 6 = 2 × 3입니다.'],'','','듣기1점 / 말하기1점'], q:'다음 낱말을 듣고 2번 따라 읽어 보세요.', demo:'click2'},
+ {code:'클릭3', g:'클릭', name:'문장에서 해당하는 곳 눌러 고르기(정답 여러 개)', v:'클릭해 문제 풀기 · 예: 높임말이 표현된 곳 찾기, 기회 3번', s:'mid', ours:'spot(잘못 쓴 문장 찾기)·parse(끝말 고르기)와 비슷', stage:'교과서 맛보기·연습하기', use:'‘문장 속 낱말 찾기’로 넓히면 좋음', img:'2025_클릭3', sb:['클릭3','교과서 문장에서 오늘의 낱말 찾기',['18을','소인수분해하고','2³을','거듭제곱으로','나타내시오.'],'소인수분해하고\n거듭제곱으로','3번','읽기1점'], q:'문장에서 오늘 배운 낱말을 모두 찾아 눌러 보세요.', demo:'click3'},
+ {code:'클릭4', g:'클릭', name:'그림 보고 알맞은 낱말 고르기', v:'그림을 보고 알맞은 낱말 고르기 · 예: (가/께서) (읽는다/읽으신다)', s:'ok', ours:'choice · ch(…, {fig})', stage:'연습하기', use:'씀(기본 고르기)', img:'13_클릭4', sb:['클릭4','[그림] 6 = 2 × 3 / 6을 이렇게 나타내기',['소인수분해','거듭제곱'],'소인수분해','1번','읽기1점'], q:'다음 그림에 알맞은 낱말을 선택해 보세요.', demo:'click4'},
+ {code:'클릭5', g:'클릭', name:'알맞은 그림 고르기', v:'알맞은 그림 고르기 · 예: 생명을 보호하는 모습, 기회 3번', s:'ok', ours:'choice(보기가 그림) · ch(q, [{fig:…}, …], 정답)', stage:'연습하기', use:'씀', img:'2025_클릭5', sb:['클릭5','‘거듭제곱’을 나타낸 그림은?',['[그림] 6 = 2 × 3','[그림] 2 × 2 × 2 = 2³','[그림] 2 + 2 + 2 = 6'],'[그림] 2 × 2 × 2 = 2³','2번','읽기1점'], q:'‘거듭제곱’을 나타낸 것을 선택해 보세요.', demo:'click5'},
+ {code:'클릭6', g:'클릭', name:'맞으면 O, 틀리면 X', v:'맞으면 o, 틀리면 x 선택 · 기회 1번', s:'ok', ours:'OX — 원고 도우미 없음', stage:'연습하기', use:'도우미 함수만 만들면 바로 씀', img:'2025_클릭6', sb:['클릭6','2와 3은 6의 소인수예요.',['O','X'],'O','1번','읽기1점'], q:'맞으면 O, 틀리면 X를 선택해 보세요.', demo:'click6'},
+ {code:'클릭7', g:'클릭', name:'그림과 설명이 맞으면 O, 틀리면 X', v:'그림과 설명이 맞으면 o, 틀리면 x 선택 · 기회 1번', s:'ok', ours:'OX(그림 붙임) — 원고 도우미 없음', stage:'연습하기', use:'위와 같음', img:'2025_클릭7', sb:['클릭7','[그림] 2 × 2 × 2 = 2³ / 이것은 소인수분해예요.',['O','X'],'X','1번','읽기1점'], q:'그림과 설명이 맞으면 O, 틀리면 X를 선택해 보세요.', demo:'click7'},
+ {code:'클릭8', g:'클릭', name:'그림을 눌러 낱말 확인하기', v:'그림 클릭해 낱말 확인하기 · 예: [삽화]횡단보도 → 횡단보도', s:'ok', ours:'card_flip · card(...)', stage:'뜻 알아보기', use:'씀(뜻 카드)', img:'', sb:['클릭8','소인수분해',[],'','','읽기1점'], q:'낱말을 클릭해 뜻을 확인해 보세요.', demo:'click8'},
+ {code:'클릭9', g:'클릭', name:'그림과 어휘 짝 맞추기', v:'그림과 어휘 짝 맞추기 · 4쌍, 기회 3번', s:'ok', ours:'linetoline · lang_match — 원고 도우미 없음', stage:'연습하기', use:'드래그8과 같이 처리', img:'2025_클릭9', sb:['클릭9','그림 ↔ 낱말 3쌍',['[그림] 6 = 2 × 3','[그림] 2³','[그림] 2, 3, 5, 7','소수','거듭제곱','소인수분해'],'6=2×3-소인수분해 / 2³-거듭제곱 / 2,3,5,7-소수','2번','읽기1점'], q:'그림과 낱말을 짝 지어 보세요.', demo:'click9'},
+ {code:'클릭10', g:'클릭', name:'4지선다', v:'4지선다 · 예: 청소, 기회 1번(시트 예시)', s:'ok', ours:'choice · ch', stage:'연습하기', use:'씀(기회는 SB 규칙 3번으로)', img:'', sb:['클릭10','같은 수를 여러 번 곱한 것을 무엇이라고 하나요?',['소수','소인수','소인수분해','거듭제곱'],'거듭제곱','3번','읽기1점'], q:'알맞은 것을 1개 선택해 보세요.', demo:'click10'},
+ {code:'클릭11', g:'클릭', name:'그림 보고 4지선다', v:'그림을 보고 4지선다 · 기회 3번', s:'ok', ours:'choice · ch(…, {fig})', stage:'연습하기', use:'씀', img:'14_클릭11', sb:['클릭11','[그림] 12 = 2 × 2 × 3 / 12를 이렇게 나타내는 것은?',['약수','소수','소인수분해','거듭제곱'],'소인수분해','3번','읽기1점'], q:'다음 그림을 보고 알맞은 것을 1개 선택해 보세요.', demo:'click11'},
+ {code:'클릭12', g:'클릭', name:'그림을 눌러 세부 설명 보기', v:'그림을 클릭해 세부 설명 확인 · 예: 조상, 차례상', s:'mid', ours:'curation(눌러서 작은 창)', stage:'정리하기·오늘의 어휘', use:'필요할 때', img:'', sb:['클릭12','[그림] 소수 / 소인수분해 설명 창',['소수: 약수가 1과 자기 자신, 2개뿐인 수','소인수분해: 자연수를 소인수의 곱으로 나타내는 것'],'','','읽기1점'], q:'그림을 클릭해 자세한 설명을 확인해 보세요.', demo:'click12'},
+ {code:'클릭13', g:'클릭', name:'문장·낱말을 눌러 성우 음성 듣기(2025 화면)', v:'문장/낱말을 누르면 성우 음성', s:'ok', ours:'guide 낱말 카드 · talk 말풍선(틀이 자동)', stage:'오늘의 어휘·교과서 맛보기', use:'씀', img:'2025_클릭13', sb:['클릭13','소인수분해 / 거듭제곱',['소인수분해','거듭제곱'],'','',''], q:'(지시문 없음) 카드를 눌러 들어 보세요.', demo:'click13'},
+ {code:'클릭14', g:'클릭', name:'관계 있는 카드 짝짓기(2025 화면)', v:'관계 있는 카드끼리 짝짓기', s:'mid', ours:'linetoline과 비슷', stage:'연습하기', use:'드래그7과 같이 처리하거나 카드 뒤집기 놀이로', img:'2025_클릭14', sb:['클릭14','낱말 카드 ↔ 예 카드',['소인수분해','거듭제곱','6 = 2 × 3','2 × 2 × 2 = 2³'],'소인수분해-6=2×3\n거듭제곱-2×2×2=2³','3번','읽기1점'], q:'관계있는 카드끼리 짝을 지어 보세요.', demo:'click14'},
+ {code:'녹음1', g:'녹음', name:'문장을 듣고 따라 녹음', v:'문장을 듣고 따라 녹음하기', s:'ok', ours:'step_recorde · say(\'문장\', \'읽는 말\')', stage:'연습하기', use:'씀', img:'2025_녹음1', sb:['녹음1','6을 소인수분해하면 6 = 2 × 3입니다.',[],'','','말하기1점'], q:'다음을 듣고 따라 말해 보세요.', demo:'rec1'},
+ {code:'녹음2', g:'녹음', name:'빈칸에 들어갈 어휘를 고른 뒤 녹음', v:'문장 빈칸에 들어갈 어휘 선택 후 녹음하기 · 예: 우리 학교에는 ___이 있어요.', s:'no', ours:'없음', stage:'연습하기', use:'연습 마무리로 좋음 → 추가 후보', img:'15_녹음2', sb:['녹음2','2³은 2의 (    )입니다.',['소인수분해','거듭제곱'],'거듭제곱','','말하기1점'], q:'빈칸에 알맞은 낱말을 고르고 문장을 말해 보세요.', demo:'rec2'},
+ {code:'녹음3', g:'녹음', name:'화면의 글을 보고 따라 읽기(녹음)', v:'화면의 글을 보고 따라 읽기 · 말하기 1점', s:'mid', ours:'listen(듣고 읽기, 녹음 없음) · book', stage:'교과서 맛보기', use:'교과서 문장 읽기를 녹음3으로 할지 업체와 협의', img:'16_녹음3', sb:['녹음3','12를 소인수분해하시오. / 2 × 2 × 2를 거듭제곱으로 나타내시오.',[],'','','말하기1점'], q:'화면의 문장을 보고 소리 내어 읽어 보세요.', demo:'rec3'},
+ {code:'녹음4', g:'녹음', name:'앞에서 캐릭터가 말한 문장 똑같이 말하기', v:'앞에서 캐릭터가 말한 문장을 똑같이 따라 말하기 · 말하기 1점', s:'mid', ours:'talk 뒤에 say', stage:'교과서 맛보기', use:'용례 대화 뒤에 붙이면 좋음', img:'17_녹음4', sb:['녹음4','(아린) 6을 소인수분해하면 6 = 2 × 3입니다.',[],'','','말하기1점'], q:'친구처럼 이야기해 보세요.(말하기)', demo:'rec4'},
+ {code:'녹음5', g:'녹음', name:'앞 애니메이션과 똑같이 말하기', v:'앞의 애니메이션과 동일하게 말하기 · 말하기 1점', s:'mid', ours:'say', stage:'뜻 알아보기 뒤', use:'필요할 때', img:'', sb:['녹음5','이것을 ‘소인수분해’라고 해요.',[],'','','말하기1점'], q:'영상에서 들은 말을 똑같이 말해 보세요.', demo:'rec5'},
+ {code:'추가', g:'추가', name:'목록에 없는 활동(우리 샘플: 스스로 점검)', v:'위 활동 외에 추가되어야 하는 활동들은 따로 작성', s:'ok', ours:'checklist(정리하기)', stage:'정리하기', use:'샘플은 추가1로 적음', img:'', sb:['추가1','[스스로 점검] 낱말마다 알아요 / 다시 볼래요',['소인수분해','거듭제곱'],'','',''], q:'오늘 익힌 낱말을 알고 있나요?', demo:'extra'},
+];
+
+// ── 동작 예시 ──────────────────────────────────────────
+const D = {
+ write1(b){ const r = el('div','row'); const pen = el('button','btn','✏️ 연필'); r.append(pen); b.append(r); const p = pad(320,110,'소인수분해'); p.style.display='none'; b.append(p); const j = judge(b,2,'쓰기 1점');
+   pen.onclick = () => { p.style.display = ''; pen.style.display = 'none'; }; checkRow(b, () => j.check(p.strokes() > 20), () => { p.clear(); j.reset(); }); b.append(el('div','tip','흐린 글자를 따라 쓰면 업체 AI가 글씨를 인식합니다(예시는 획 수만 봄).')); },
+ write2(b){ const svg = `<svg width="300" height="110" viewBox="0 0 300 110"><text x="150" y="85" text-anchor="middle" font-size="86" font-weight="900" fill="none" stroke="#9aa3b5" stroke-width="2.5" stroke-dasharray="2 9" stroke-linecap="round">소수</text></svg>`;
+   const p = pad(300,110); const g = el('div','ghost',svg); p.prepend(g); b.append(p); const j = judge(b,2,'쓰기 1점'); checkRow(b, () => j.check(p.strokes() > 20), () => { p.clear(); j.reset(); }); },
+ write3(b){ const c = el('div','cells'); const ps = ['소','인','수'].map(t => { const p = pad(90,90,t,64); p.classList.add('cell'); c.append(p); return p; }); b.append(c); const j = judge(b,2,'쓰기 1점'); checkRow(b, () => j.check(ps.every(p => p.strokes() > 6)), () => { ps.forEach(p => p.clear()); j.reset(); }); },
+ write4(b){ b.append(el('div','fig','6 = 2 × 3')); const s = el('div','sent','6을 '); const sl = el('span','slot','✏️'); s.append(sl, document.createTextNode('하면 6 = 2 × 3입니다.')); b.append(s); const p = pad(300,90,'소인수분해'); p.style.display='none'; b.append(p);
+   sl.onclick = () => { p.style.display = ''; }; const j = judge(b,4,'쓰기 1점'); checkRow(b, () => { const ok = j.check(p.strokes() > 20, () => sl.textContent = '소인수분해'); if (p.strokes() > 20) sl.textContent = '소인수분해', sl.classList.add('fill'); }, () => { p.clear(); sl.textContent = '✏️'; sl.classList.remove('fill'); j.reset(); }); },
+ write5(b){ b.append(el('div','fig','2³ = 2 × 2 × 2')); const s = el('div','sent','2³은 2의 '); const i = el('input'); i.style.cssText = 'font:inherit;width:120px;text-align:center;border:2px solid #2f6fe4;border-radius:8px'; s.append(i, document.createTextNode('입니다.')); b.append(s);
+   const j = judge(b,4,'쓰기 1점'); checkRow(b, () => j.check(i.value.replace(/\s/g,'') === '거듭제곱', () => i.value = '거듭제곱'), () => { i.value = ''; j.reset(); }); b.append(el('div','tip','⌨️ 자판으로 써요. 띄어쓰기는 따지지 않아요.')); },
+ write6(b){ const t = el('textarea'); t.rows = 3; t.style.cssText = 'width:100%;max-width:420px;font:inherit;border:2px solid #1d2433;border-radius:8px;padding:6px'; t.placeholder = '예: 12를 소인수분해하면 12 = 2 × 2 × 3입니다.'; b.append(t);
+   const r = el('div','row'); const up = el('label','btn','📷 내가 쓴 글 사진 올리기'); const f = el('input'); f.type = 'file'; f.accept = 'image/*'; f.style.display = 'none'; up.append(f); const nm = el('span','tip',''); f.onchange = () => nm.textContent = f.files[0] ? f.files[0].name + ' (예시: 업체가 글자 인식으로 고쳐 줌)' : ''; r.append(up, nm); b.append(r);
+   const j = judge(b,2,'쓰기 1점'); checkRow(b, () => j.check(t.value.includes('소인수분해') || t.value.includes('거듭제곱') || f.files.length)); },
+ write7(b){ const r = el('div','row'); const s = el('button','round','▶'); s.onclick = () => speak('육을 소인수분해하면 육은 이 곱하기 삼입니다.'); r.append(s); b.append(r); const t = el('div','sent','6을 '); const i = el('input'); i.style.cssText = 'font:inherit;width:120px;text-align:center;border:2px solid #2f6fe4;border-radius:8px'; t.append(i, document.createTextNode('하면 6 = 2 × 3입니다.')); b.append(t);
+   const j = judge(b,4,'쓰기 1점'); checkRow(b, () => j.check(i.value.replace(/\s/g,'') === '소인수분해', () => i.value = '소인수분해'), () => { i.value = ''; j.reset(); }); },
+ write8(b){ ['소인수분해','거듭제곱'].forEach(w => { const r = el('div','say'); const s = el('button','round','▶'); s.onclick = () => speak(w); const i = el('input'); i.style.cssText = 'font:inherit;width:120px;border:2px solid #2f6fe4;border-radius:8px;text-align:center'; const mk = el('b','', ''); i.oninput = () => { mk.textContent = i.value.trim() === w ? '✓' : ''; mk.style.color = '#0a8f5b'; if (b.querySelectorAll('b').length && [...b.querySelectorAll('b')].every(x => x.textContent)) b.closest('.stage').querySelector('.coin').classList.add('on'); }; r.append(s, el('span','', w), i, mk); b.append(r); });
+   b.closest('.stage').append(el('div','coin','🪙 쓰기 1점')); b.append(el('div','tip','맞게 쓰면 ✓가 생겨요(틀렸다는 표시는 하지 않음).')); },
+ drag1(b){ const nums = shuffle(['2','3','4','5','6','9']); const ch = nums.map(n => { const c = el('span','chip',n); c.dataset.v = n; return c; }); const r = el('div','row'); r.append(...ch); b.append(r);
+   const bins = el('div','bins'); const A = el('div','bin a','<b>소수</b>'), B = el('div','bin b','<b>합성수</b>'); bins.append(A, B); b.append(bins); const put = {};
+   dnd(ch, [A, B], (c, t) => { const x = el('span','chip',c.textContent); x.title = '두 번 누르면 빠져요'; x.ondblclick = e => { e.stopPropagation(); x.remove(); c.classList.remove('used'); delete put[c.dataset.v]; }; t.append(x); c.classList.add('used'); put[c.dataset.v] = t === A ? 'a' : 'b'; });
+   b.append(el('div','tip','바구니에 넣은 수는 두 번 누르면 빠져요.')); const ans = {2:'a',3:'a',5:'a',4:'b',6:'b',9:'b'}; const j = judge(b,4); checkRow(b, () => j.check(Object.keys(ans).every(k => put[k] === ans[k]), () => { A.innerHTML = '<b>소수</b> 2, 3, 5'; B.innerHTML = '<b>합성수</b> 4, 6, 9'; })); },
+ drag2(b){ const P = [['6 = 2 × 3','a'],['2 × 2 × 2 = 2³','b'],['10 = 2 × 5','a'],['5 × 5 = 5²','b']]; const ch = shuffle(P).map(([t, k]) => { const c = el('span','chip pic',t + '<small>그림</small>'); c.style.borderRadius = '10px'; c.dataset.v = t; c.dataset.k = k; return c; }); const r = el('div','row'); r.append(...ch); b.append(r);
+   const bins = el('div','bins'); const A = el('div','bin a','<b>소인수분해</b>'), B = el('div','bin b','<b>거듭제곱</b>'); bins.append(A, B); b.append(bins); const put = {};
+   dnd(ch, [A, B], (c, t) => { const x = el('span','chip', c.dataset.v); t.append(x); c.classList.add('used'); put[c.dataset.v] = (t === A ? 'a' : 'b') === c.dataset.k; });
+   const j = judge(b,4); checkRow(b, () => j.check(P.every(([t]) => put[t] === true), () => { A.innerHTML = '<b>소인수분해</b> 6 = 2 × 3, 10 = 2 × 5'; B.innerHTML = '<b>거듭제곱</b> 2 × 2 × 2 = 2³, 5 × 5 = 5²'; }),
+     () => { A.innerHTML = '<b>소인수분해</b>'; B.innerHTML = '<b>거듭제곱</b>'; ch.forEach(c => c.classList.remove('used')); for (const k in put) delete put[k]; j.reset(); }); },
+ drag3(b){ const s = el('div','sent','6을 '); const sl = el('span','slot',''); s.append(sl, document.createTextNode('하면 6 = 2 × 3입니다.')); b.append(s); const ch = ['소인수분해','거듭제곱'].map(t => { const c = el('span','chip',t); c.dataset.v = t; return c; }); const r = el('div','row'); r.append(...ch); b.append(r);
+   dnd(ch, [sl], (c, t) => { t.textContent = c.dataset.v; t.classList.add('fill'); }); const j = judge(b,2); checkRow(b, () => j.check(sl.textContent === '소인수분해', () => { sl.textContent = '소인수분해'; sl.classList.add('fill'); }), () => { sl.textContent = ''; sl.classList.remove('fill'); j.reset(); }); },
+ drag4(b){ const s = el('div','sent'); const sl = [0,1,2].map(() => el('span','slot','')); s.append('6을 ', sl[0], '하면 6 = 2 × 3입니다. 2와 3은 6의 ', sl[1], '입니다. 2³은 2의 ', sl[2], '입니다.'); s.style.fontSize = '16px'; b.append(s);
+   const ch = shuffle(['소인수','소인수분해','거듭제곱']).map(t => { const c = el('span','chip',t); c.dataset.v = t; return c; }); const r = el('div','row'); r.append(...ch); b.append(r);
+   dnd(ch, sl, (c, t) => { t.textContent = c.dataset.v; t.classList.add('fill'); }); const A = ['소인수분해','소인수','거듭제곱']; const j = judge(b,3);
+   checkRow(b, () => j.check(sl.every((x, i) => x.textContent === A[i]), () => sl.forEach((x, i) => { x.textContent = A[i]; x.classList.add('fill'); })), () => { sl.forEach(x => { x.textContent = ''; x.classList.remove('fill'); }); j.reset(); }); },
+ drag5(b){ const P = [['🧱🧱<br>🧱🧱','쌓인 블록'],['🧱 〰️ 🧱','흔들리는 블록'],['🧱 · 🧱 · 🧱','흩어진 블록']]; const ch = shuffle(P).map(([e, t]) => { const c = el('span','chip pic',e + '<small>' + t + '</small>'); c.style.borderRadius = '10px'; c.dataset.v = t; return c; }); const r = el('div','row'); r.append(...ch); b.append(r);
+   const sl = [1,2,3].map(n => el('span','slot',n + '번')); const r2 = el('div','row'); r2.append(...sl); b.append(r2); dnd(ch, sl, (c, t) => { t.textContent = c.dataset.v; t.classList.add('fill'); });
+   const A = ['쌓인 블록','흔들리는 블록','흩어진 블록']; const j = judge(b,3); checkRow(b, () => j.check(sl.every((x, i) => x.textContent === A[i]), () => sl.forEach((x, i) => x.textContent = A[i])), () => { sl.forEach((x, i) => { x.textContent = (i + 1) + '번'; x.classList.remove('fill'); }); j.reset(); }); },
+ drag6(b){ const A = ['6을','소인수분해하면','6 = 2 × 3입니다.']; const ch = shuffle(A).map(t => { const c = el('span','chip',t); c.dataset.v = t; return c; }); const r = el('div','row'); r.append(...ch); b.append(r);
+   const sl = A.map(() => el('span','slot','')); const r2 = el('div','row'); r2.append(...sl); b.append(r2); dnd(ch, sl, (c, t) => { t.textContent = c.dataset.v; t.classList.add('fill'); c.classList.add('used'); });
+   const j = judge(b,3); checkRow(b, () => j.check(sl.every((x, i) => x.textContent === A[i]), () => sl.forEach((x, i) => x.textContent = A[i])), () => { sl.forEach(x => { x.textContent = ''; x.classList.remove('fill'); }); ch.forEach(c => c.classList.remove('used')); j.reset(); }); },
+ drag7(b){ lines(b, ['소인수분해','거듭제곱'], ['같은 수를 여러 번 곱한 것','자연수를 소인수의 곱으로 나타내는 것'], [1, 0]); },
+ drag8(b){ const L = ['2 × 2 × 2 = 2³','12 = 2 × 2 × 3'].map(t => el('button','opt pic',t + '<small>그림</small>')); lines(b, L, ['소인수분해','거듭제곱'], [1, 0]); },
+ drag82(b){ const parts = ['ㄱ','ㅓ','ㄷ','ㅡ','ㅂ']; const ch = parts.map(t => { const c = el('span','chip',t); c.dataset.v = t; return c; }); const r = el('div','row'); r.append(...ch); b.append(r); const out = el('div','fig',''); b.append(out); let seq = [];
+   const comp = s => s.join('') === 'ㄱㅓㄷㅡㅂ' ? '거듭' : s.join(' '); ch.forEach(c => c.onclick = () => { seq.push(c.dataset.v); out.textContent = comp(seq); c.classList.add('used'); });
+   const j = judge(b,2); checkRow(b, () => j.check(out.textContent === '거듭', () => out.textContent = '거듭'), () => { seq = []; out.textContent = ''; ch.forEach(c => c.classList.remove('used')); j.reset(); }); },
+ click1(b){ const r = el('div','row'); [['6 = 2 × 3','소인수분해'],['2 × 2 × 2 = 2³','거듭제곱'],['2, 3, 5, 7','소수']].forEach(([f, w]) => { const c = el('div','card'); c.innerHTML = `<div class="in"><div class="f" style="background:#fff7dc;color:#1d2433;font-size:15px">${f}<br><small style="font-size:11px">그림</small></div><div class="b">${w}</div></div>`; c.onclick = () => { c.classList.toggle('flip'); speak(w); b.closest('.stage').querySelector('.coin').classList.add('on'); }; r.append(c); }); b.append(r); b.closest('.stage').append(el('div','coin','🪙 읽기 1점')); },
+ click2(b){ b.append(sayRow('소인수분해'), sayRow('6을 <b style="color:#d81e5b">소인수분해</b>하면 6 = 2 × 3입니다.', '육을 소인수분해하면 육은 이 곱하기 삼입니다.')); b.append(el('div','tip','🔊를 누르고 따라 읽으면 동그라미가 채워져요(2번).')); },
+ click3(b){ const W = ['18을','소인수분해하고','2³을','거듭제곱으로','나타내시오.'], A = [1, 3]; const s = el('div','sent'); const ws = W.map((w, i) => { const x = el('span','word', w); x.onclick = () => x.classList.toggle('sel'); s.append(x, ' '); return x; }); b.append(s);
+   const j = judge(b,4); checkRow(b, () => j.check(ws.every((x, i) => x.classList.contains('sel') === A.includes(i)), () => ws.forEach((x, i) => x.classList.toggle('right', A.includes(i)))), () => { ws.forEach(x => x.classList.remove('sel','right')); j.reset(); }); },
+ choice(b, opts, ans, fig){ if (fig) b.append(fig); const r = el('div','row'); let sel = null; const bs = opts.map((o, i) => { const x = el('button','opt', o); x.onclick = () => { bs.forEach(y => y.classList.remove('sel')); x.classList.add('sel'); sel = i; }; r.append(x); return x; }); b.append(r);
+   const j = judge(b, opts.length); checkRow(b, () => { if (sel == null) return; const ok = sel === ans; bs.forEach(y => y.classList.remove('right','wrong')); bs[sel].classList.add(ok ? 'right' : 'wrong'); j.check(ok, () => bs[ans].classList.add('right')); }, () => { sel = null; bs.forEach(y => y.classList.remove('sel','right','wrong')); j.reset(); }); },
+ click4(b){ D.choice(b, ['소인수분해','거듭제곱'], 0, el('div','fig','6 = 2 × 3<br><small style="font-size:14px">6을 이렇게 나타내기</small>')); },
+ click5(b){ D.choice(b, ['<span class="fig s">6 = 2 × 3</span>','<span class="fig s">2 × 2 × 2 = 2³</span>','<span class="fig s">2 + 2 + 2 = 6</span>'], 1); },
+ click6(b){ b.append(el('div','sent','2와 3은 6의 소인수예요.')); D.choice(b, ['<span style="color:#2f6fe4;font-size:24px">O</span>','<span style="color:#e24b4b;font-size:24px">X</span>'], 0); },
+ click7(b){ b.append(el('div','fig','2 × 2 × 2 = 2³')); b.append(el('div','sent','이것은 소인수분해예요.')); D.choice(b, ['<span style="color:#2f6fe4;font-size:24px">O</span>','<span style="color:#e24b4b;font-size:24px">X</span>'], 1); b.append(el('div','tip','정답 X — 같은 수를 여러 번 곱한 것은 거듭제곱이에요.')); },
+ click8(b){ const c = el('div','card'); c.style.cssText = 'width:240px;height:130px'; c.innerHTML = '<div class="in"><div class="f" style="font-size:28px">소인수분해</div><div class="b" style="flex-direction:column"><div style="font-size:22px">6 = 2 × 3</div><div style="font-size:13px;font-weight:700">소인수분해는 자연수를 소인수의 곱으로 나타내는 거예요.</div></div></div>'; c.onclick = () => { c.classList.toggle('flip'); b.closest('.stage').querySelector('.coin').classList.add('on'); }; b.append(c); b.closest('.stage').append(el('div','coin','🪙 읽기 1점')); },
+ click9(b){ const L = ['6 = 2 × 3','2³','2, 3, 5, 7'].map(t => el('button','opt pic',t + '<small>그림</small>')); lines(b, L, ['소수','거듭제곱','소인수분해'], [2, 1, 0]); },
+ click10(b){ b.append(el('div','sent','같은 수를 여러 번 곱한 것을 무엇이라고 하나요?')); D.choice(b, ['소수','소인수','소인수분해','거듭제곱'], 3); },
+ click11(b){ D.choice(b, ['약수','소수','소인수분해','거듭제곱'], 2, el('div','fig','12 = 2 × 2 × 3')); },
+ click12(b){ const r = el('div','row'); [['2, 3, 5, 7','소수','약수가 1과 자기 자신, 2개뿐인 수예요. 1은 약수가 1 하나뿐이라 소수가 아니에요.'],['6 = 2 × 3','소인수분해','자연수를 소인수의 곱으로 나타내는 거예요. 6은 2와 3으로 소인수분해해요.']].forEach(([f, w, d]) => { const p = el('div','pic', f + '<small>' + w + ' · 눌러 보기</small>'); p.onclick = () => { b.closest('.stage').querySelectorAll('.pop').forEach(x => x.remove()); const pop = el('div','pop', `<b>${w}</b><br>${d}<div style="text-align:right"><button class="btn" style="padding:2px 10px">닫기</button></div>`); pop.querySelector('button').onclick = e => { e.stopPropagation(); pop.remove(); }; b.closest('.stage').append(pop); speak(w + '. ' + d); }; r.append(p); }); b.append(r); },
+ click13(b){ const r = el('div','row'); ['★ 소인수분해','거듭제곱'].forEach((w, i) => { const x = el('button','btn', w + ' <span style="font-size:13px">🔊</span>'); x.style.cssText = 'font-size:22px;padding:10px 20px;' + (i ? '' : 'background:#fff1b8'); x.onclick = () => speak(w.replace('★ ','')); r.append(x); }); b.append(el('div','row','<span class="who">🌱</span><span class="bub">이번 시간에는 ‘소인수분해’와 ‘거듭제곱’에 대해 배우겠습니다.</span>')); b.append(r); },
+ click14(b){ const P = [['소인수분해','6 = 2 × 3'],['거듭제곱','2 × 2 × 2 = 2³']]; const cards = shuffle(P.flatMap(([a, c], k) => [[a, k], [c, k]])); const r = el('div','row'); let open = []; let done = 0; const j = judge(b,4);
+   cards.forEach(([t, k]) => { const c = el('div','card'); c.innerHTML = `<div class="in"><div class="f">?</div><div class="b">${t}</div></div>`; c.onclick = () => { if (c.classList.contains('flip') || open.length === 2) return; c.classList.add('flip'); open.push([c, k]); if (open.length === 2) { const [[c1, k1], [c2, k2]] = open; setTimeout(() => { if (k1 === k2) { c1.classList.add('done'); c2.classList.add('done'); done++; if (done === P.length) j.check(true); } else { c1.classList.remove('flip'); c2.classList.remove('flip'); j.msg('다시 찾아보세요.'); } open = []; }, 700); } }; r.append(c); }); b.prepend(r); },
+ rec1(b){ b.append(sayRow('6을 <b style="color:#d81e5b">소인수분해</b>하면 6 = 2 × 3입니다.', '육을 소인수분해하면 육은 이 곱하기 삼입니다.', false)); recorder(b, '따라 말하기'); },
+ rec2(b){ const s = el('div','sent','2³은 2의 '); const sl = el('span','slot',''); s.append(sl, document.createTextNode('입니다.')); b.append(s); const r = el('div','row'); ['소인수분해','거듭제곱'].forEach(w => { const x = el('button','opt', w); x.onclick = () => { sl.textContent = w; sl.classList.add('fill'); if (w === '거듭제곱') { fb.textContent = '맞아요! 이제 문장 전체를 말해 보세요.'; fb.className = 'fb ok'; rw.style.display = ''; } else { fb.textContent = '한 번 더 풀어볼까요?'; fb.className = 'fb no'; } }; r.append(x); }); b.append(r); const fb = el('div','fb'); b.append(fb); const rw = el('div'); rw.style.display = 'none'; b.append(rw); recorder(rw, '문장 말하기'); },
+ rec3(b){ const t = el('div','bub','12를 소인수분해하시오.<br>2 × 2 × 2를 거듭제곱으로 나타내시오.'); t.style.cssText += ';background:#fffaf0;border-color:#a37a00;max-width:420px'; b.append(el('div','row','<span style="font-size:12px;font-weight:800;background:#7a5c00;color:#fff;border-radius:6px;padding:1px 8px">교과서</span>'), t); recorder(b, '읽고 녹음'); },
+ rec4(b){ b.append(el('div','row','<span class="who">👧</span><span class="bub">6을 <b style="color:#7c3aed">소인수분해</b>하면 6 = 2 × 3입니다.</span>')); const r = el('div','row'); const s = el('button','btn','🔊 친구 말 듣기'); s.onclick = () => speak('육을 소인수분해하면 육은 이 곱하기 삼입니다.'); r.append(s); b.append(r); recorder(b, '친구처럼 말하기'); },
+ rec5(b){ b.append(el('div','fig','6 = 2 × 3 → 소인수분해')); b.append(el('div','tip','(앞 영상의 마지막 컷: “이것을 ‘소인수분해’라고 해요.”)')); const r = el('div','row'); const s = el('button','btn','▶ 영상 마지막 말 다시 듣기'); s.onclick = () => speak('이것을 소인수분해라고 해요.'); r.append(s); b.append(r); recorder(b, '똑같이 말하기'); },
+ extra(b){ [['소인수분해','자연수를 소인수의 곱으로 나타내는 것 · 예: 6 = 2 × 3'],['거듭제곱','같은 수를 여러 번 곱한 것 · 예: 2 × 2 × 2 = 2³']].forEach(([w, d]) => { const r = el('div','say'); r.style.minWidth = '360px'; const k = el('span','row'); const y = el('button','btn','알아요'), n = el('button','btn','다시 볼래요'); y.onclick = () => { y.style.background = '#d8f5e5'; n.style.background = ''; }; n.onclick = () => { n.style.background = '#fff1b8'; y.style.background = ''; alertLike(b, '→ ‘' + w + '’ 뜻 알아보기 영상으로 돌아가요(실제 콘텐츠).'); }; k.append(y, n); r.append(el('span','', `<b>${w}</b><br><small>${d}</small>`), k); b.append(r); }); },
+};
+function alertLike(b, t) { let f = b.querySelector('.fb'); if (!f) { f = el('div','fb'); b.append(f); } f.textContent = t; f.className = 'fb'; }
+
+// ── 그리기 ──────────────────────────────────────────
+const SN = { ok: ['b-ok','✅ 틀에 있음'], mid: ['b-mid','△ 비슷하게'], no: ['b-no','✗ 없음'] };
+const list = $('#list'), nav = $('#nav'); let grp = '';
+T.forEach(t => {
+  if (t.g !== grp) { grp = t.g; nav.append(el('h4','', grp === '드래그' ? '드래그 앤 드롭' : grp)); }
+  const id = 't-' + t.code; const a = el('a','', `${t.code} <span class="s">${SN[t.s][1].slice(0, 1)}</span>`); a.href = '#' + id; nav.append(a);
+  const card = el('section','type'); card.id = id; card.dataset.s = t.s; card.dataset.g = t.g;
+  card.append(el('div','th', `<span class="code">${t.code}</span><span class="name">${t.name}</span><span class="badge ${SN[t.s][0]}">${SN[t.s][1]}</span>`));
+  const tb = el('div','tb'); const info = el('div','info');
+  const sb = t.sb; const opts = sb[2].map(x => `<td>${x}</td>`).join('');
+  info.innerHTML = `<dl><dt>업체 설명</dt><dd>${t.v}</dd><dt>우리 틀</dt><dd>${t.ours}</dd><dt>쓰는 단계</dt><dd>${t.stage}</dd><dt>판단</dt><dd><b>${t.use}</b></dd></dl>
+    <div class="sb"><b>스토리보드 시트에 적기</b><table><tr><th>F 내용</th><th>G</th>${sb[2].map((x, i) => `<th>보기${i + 1}</th>`).join('')}<th>정답</th><th>기회</th><th>보상</th></tr>
+    <tr><td>지시문</td><td colspan="${sb[2].length + 4}">${t.q}</td></tr><tr><td>${sb[0]}</td><td>${sb[1]}</td>${opts}<td>${String(sb[3]).replace(/\n/g, '<br>')}</td><td>${sb[4]}</td><td>${sb[5]}</td></tr></table></div>`;
+  const shows = [];
+  if (IMG[t.img] && !t.img.startsWith('2025')) shows.push(['원고집필 템플릿 예시', IMG[t.img]]);
+  const k25 = '2025_' + t.code; if (IMG[k25]) shows.push(['2025 수학 실제 화면', IMG[k25]]);
+  shows.forEach(([n, src]) => { const dt = el('details'); dt.innerHTML = `<summary>업체 그림 보기 — ${n}</summary><img loading="lazy" src="${src}" alt="">`; info.append(dt); });
+  const demo = el('div','demo'); demo.append(el('div','dq', t.q)); const st = el('div','stage'); const box = el('div'); box.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:10px;width:100%'; st.append(box); demo.append(st);
+  tb.append(info, demo); card.append(tb); list.append(card);
+  try { D[t.demo](box); } catch (e) { box.append(el('div','tip','예시 오류: ' + e.message)); console.error(t.code, e); }
+});
+// 거르기
+const F = [['all','전체'],['ok','✅ 틀에 있음'],['mid','△ 비슷하게'],['no','✗ 없음'],['쓰기','쓰기'],['드래그','드래그'],['클릭','클릭'],['녹음','녹음']];
+F.forEach(([k, n], i) => { const b = el('button', i ? '' : 'on', n); b.onclick = () => { [...$('#filters').children].forEach(x => x.classList.remove('on')); b.classList.add('on'); document.querySelectorAll('.type').forEach(c => c.classList.toggle('hide', !(k === 'all' || c.dataset.s === k || c.dataset.g === k))); }; $('#filters').append(b); });
+</script>
+</body>
+</html>
