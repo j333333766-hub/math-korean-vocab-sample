@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>연수 현황판</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* 레이아웃: 위 요약 숫자 → 단계별 완료 막대 → [선생님 표 | 최근 기록]. 연수 페이지와 같은 아이보리·클레이 */
+:root{
+  --bg:#faf9f5; --surface:#ffffff; --sunk:#f0eee6; --ink:#141413; --muted:#6b6a63; --line:#e6e3d8;
+  --clay:#d97757; --clay-ink:#b2532f; --clay-soft:#f7e8e0; --ok:#5f7a45; --ok-soft:#e8eedf; --warn:#9a6a00; --warn-soft:#faf0d9;
+  --serif:"Noto Serif KR",Georgia,serif; --sans:"Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+  --shadow:0 1px 2px rgba(20,20,19,.05),0 10px 30px -14px rgba(20,20,19,.2); color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#262624;--surface:#30302e;--sunk:#1f1e1d;--ink:#f0eee6;--muted:#a8a59b;--line:#3e3d39;--clay:#e08a6c;--clay-ink:#f0a184;--clay-soft:#45302a;--ok:#a7c08a;--ok-soft:#2f3828;--warn:#e6b85c;--warn-soft:#3b3220;--shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#262624;--surface:#30302e;--sunk:#1f1e1d;--ink:#f0eee6;--muted:#a8a59b;--line:#3e3d39;--clay:#e08a6c;--clay-ink:#f0a184;--clay-soft:#45302a;--ok:#a7c08a;--ok-soft:#2f3828;--warn:#e6b85c;--warn-soft:#3b3220;--shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+a{color:var(--clay-ink)}
+h1,h2{font-family:var(--serif);margin:0;letter-spacing:-.01em}
+.gut{padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.in{max-width:1240px;margin:0 auto}
+.top{border-bottom:1px solid var(--line);background:var(--surface)}
+.top .in{display:flex;align-items:center;gap:12px;min-height:60px;flex-wrap:wrap;padding-block:8px}
+.mark{display:flex;align-items:center;gap:10px;font-weight:700}
+.mark i{width:26px;height:26px;border-radius:8px;background:var(--clay);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-style:normal;font-family:var(--serif)}
+.top .sp{flex:1}
+.upd{font-size:13px;color:var(--muted)}
+.btn{font:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:6px 12px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn.dark{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tog{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+main .in{display:flex;flex-direction:column;gap:22px;padding-block:26px 60px}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:2px}
+.tile span{font-size:13px;color:var(--muted)}
+.tile b{font-family:var(--serif);font-size:30px;line-height:1.2}
+.tile small{font-size:13px;color:var(--muted)}
+.tile.hl b{color:var(--clay-ink)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 20px;min-width:0}
+.card h2{font-size:18px;margin-bottom:12px}
+.funnel{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:8px;align-items:end}
+.fcol{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.fbar{width:100%;height:110px;background:var(--sunk);border-radius:8px;position:relative;overflow:hidden}
+.fbar i{position:absolute;left:0;right:0;bottom:0;background:var(--clay);border-radius:8px 8px 0 0;transition:height .4s}
+.fnum{font-weight:700;font-size:14px}
+.flab{font-size:12px;color:var(--muted);text-align:center;line-height:1.3;word-break:keep-all}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:22px;align-items:start}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:12px;color:var(--muted);font-weight:500;white-space:nowrap}
+th.st{text-align:center;width:34px}
+td.nm{font-weight:700;white-space:nowrap}
+.pbar{display:flex;align-items:center;gap:8px;min-width:120px}
+.pbar .t{flex:1;height:8px;background:var(--sunk);border-radius:99px;overflow:hidden}.pbar .t i{display:block;height:100%;background:var(--clay)}
+.pbar b{font-size:13px;white-space:nowrap}
+.dot{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line);display:inline-block;margin:auto}
+.dot.on{background:var(--clay);border-color:var(--clay)}
+.dot.next{border-color:var(--clay);border-style:dashed}
+td.c{text-align:center}
+.chip{font-size:12px;font-weight:700;border-radius:99px;padding:2px 9px;white-space:nowrap}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}.chip.warn{background:var(--warn-soft);color:var(--warn)}.chip.go{background:var(--clay-soft);color:var(--clay-ink)}
+.ago{font-size:13px;color:var(--muted);white-space:nowrap}
+.feed{display:flex;flex-direction:column;max-height:560px;overflow:auto}
+.feed div{display:grid;grid-template-columns:52px 1fr;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.feed div:last-child{border-bottom:none}
+.feed time{color:var(--muted);font-size:12px;padding-top:2px}
+.feed b{font-weight:700}
+.empty{padding:28px 6px;color:var(--muted);text-align:center}
+.gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding-block:24px}
+.gate form{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:28px;display:flex;flex-direction:column;gap:12px}
+.gate h1{font-size:24px}.gate p{color:var(--muted);font-size:14px;margin:0}
+.gate input{font:inherit;font-size:20px;letter-spacing:.3em;text-align:center;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg);color:var(--ink)}
+.gate button{font:inherit;font-size:16px;font-weight:700;border:none;border-radius:12px;padding:12px;background:var(--ink);color:var(--bg);cursor:pointer}
+.err{color:var(--clay-ink);font-size:14px;min-height:20px}
+:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
+@media (max-width:960px){.grid{grid-template-columns:minmax(0,1fr)}.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.funnel{grid-template-columns:repeat(5,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+
+<section class="gate gut" id="gate">
+  <form id="gf">
+    <div class="mark"><i>K</i>집필진 연수</div>
+    <h1>연수 현황판</h1>
+    <p>대표 교사용입니다. 비밀번호를 넣어 주세요.</p>
+    <label for="pw" style="font-size:14px;font-weight:700">비밀번호</label>
+    <input id="pw" type="password" inputmode="numeric" autocomplete="off" maxlength="12" required>
+    <div class="err" id="gerr"></div>
+    <button type="submit">들어가기</button>
+    <a href="./" style="font-size:13px;text-align:center">연수 페이지로 돌아가기</a>
+  </form>
+</section>
+
+<div id="app" hidden>
+<header class="top gut"><div class="in">
+  <div class="mark"><i>K</i>연수 현황판</div>
+  <span class="sp"></span>
+  <span class="upd" id="upd">불러오는 중…</span>
+  <label class="tog"><input type="checkbox" id="auto" checked> 20초마다 새로 보기</label>
+  <button class="btn" id="reload" type="button">새로 보기</button>
+  <a class="btn" href="./">연수 페이지</a>
+</div></header>
+
+<main class="gut"><div class="in">
+  <section class="tiles" aria-label="요약">
+    <div class="tile"><span>들어온 선생님</span><b id="tN">0</b><small id="tNs">명</small></div>
+    <div class="tile"><span>모두 마친 선생님</span><b id="tDone">0</b><small id="tDones">10단계 완료</small></div>
+    <div class="tile"><span>평균 진행</span><b id="tAvg">0</b><small>단계 / 10</small></div>
+    <div class="tile hl"><span>도움이 필요할 수 있는 선생님</span><b id="tIdle">0</b><small>10분 넘게 기록 없음(미완료)</small></div>
+  </section>
+
+  <section class="card">
+    <h2>단계별 완료</h2>
+    <div class="funnel" id="funnel"></div>
+  </section>
+
+  <div class="grid">
+    <section class="card">
+      <h2>선생님별 진행</h2>
+      <div class="tbl"><table>
+        <thead><tr id="thead"></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table></div>
+      <div class="empty" id="empty" hidden>아직 들어온 선생님이 없어요. 선생님이 연수 페이지에 이름을 넣고 들어오면 여기에 나타납니다.</div>
+    </section>
+    <section class="card">
+      <h2>최근 기록</h2>
+      <div class="feed" id="feed"></div>
+    </section>
+  </div>
+</div></main>
+</div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbyyVQ9bYSSTL5T0yYCiYR_xMSjfuE04w0ZHRJoC4DZLVoZPCOn9E2EVxwMrGGSf3OZlew/exec';
+const PK = 'ksl-training-admin';
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let pw = ''; try { pw = sessionStorage.getItem(PK) || ''; } catch (e) {}
+let timer = null;
+async function fetchStat(p) {
+  const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ act: 'trainstat', pw: p }) });
+  return r.json();
+}
+function ago(iso, now) {
+  if (!iso) return ''; const m = Math.round((now - new Date(iso)) / 60000);
+  if (m < 1) return '방금'; if (m < 60) return m + '분 전'; const h = Math.floor(m / 60); return h < 24 ? h + '시간 전' : Math.floor(h / 24) + '일 전';
+}
+const hm = iso => { if (!iso) return ''; const d = new Date(iso); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+function render(j) {
+  const steps = j.steps, S = steps.length, now = new Date(j.now || Date.now());
+  const ppl = j.people.map(p => { const n = Object.keys(p.done).length; let next = -1; for (let i = 0; i < S; i++) if (!(i in p.done)) { next = i; break; }
+    const idle = n < S && p.last && (now - new Date(p.last)) > 10 * 60000; return Object.assign({}, p, { n, next, idle }); });
+  ppl.sort((a, b) => a.n - b.n || (a.last < b.last ? -1 : 1));   // 덜 한 선생님이 위로
+  $('tN').textContent = ppl.length;
+  $('tDone').textContent = ppl.filter(p => p.n === S).length;
+  $('tAvg').textContent = ppl.length ? (ppl.reduce((s, p) => s + p.n, 0) / ppl.length).toFixed(1) : '0';
+  $('tIdle').textContent = ppl.filter(p => p.idle).length;
+  // 단계별 완료
+  const f = $('funnel'); f.innerHTML = '';
+  steps.forEach((t, i) => { const c = ppl.filter(p => i in p.done).length, h = ppl.length ? c / ppl.length * 100 : 0;
+    const who = ppl.filter(p => !(i in p.done)).map(p => p.name).join(', ');
+    const col = document.createElement('div'); col.className = 'fcol'; col.title = ppl.length ? (who ? '아직: ' + who : '모두 완료') : '';
+    col.innerHTML = `<span class="fnum">${c}<small style="color:var(--muted);font-weight:400"> / ${ppl.length}</small></span><div class="fbar"><i style="height:${h}%"></i></div><span class="flab">${esc(t)}</span>`; f.append(col); });
+  // 표
+  $('thead').innerHTML = '<th>이름</th><th>진행</th><th>지금</th>' + steps.map((t, i) => `<th class="st" title="${esc(t)}">${i}</th>`).join('') + '<th>마지막 기록</th>';
+  const tb = $('tbody'); tb.innerHTML = '';
+  ppl.forEach(p => { const tr = document.createElement('tr');
+    const status = p.n === S ? '<span class="chip ok">모두 완료</span>' : p.idle ? `<span class="chip warn">${esc(steps[p.next])}에서 멈춤</span>` : `<span class="chip go">${esc(steps[p.next])} 하는 중</span>`;
+    tr.innerHTML = `<td class="nm">${esc(p.name)}</td><td><div class="pbar"><span class="t"><i style="width:${p.n / S * 100}%"></i></span><b>${p.n} / ${S}</b></div></td><td>${status}</td>` +
+      steps.map((t, i) => `<td class="c"><span class="dot ${i in p.done ? 'on' : (i === p.next ? 'next' : '')}" title="${esc(t)}${i in p.done ? ' · 완료 ' + esc(p.done[i]) : ''}"></span></td>`).join('') +
+      `<td class="ago" title="${esc(p.last)}">${ago(p.last, now)}</td>`; tb.append(tr); });
+  $('empty').hidden = ppl.length > 0;
+  // 최근 기록
+  const fd = $('feed'); fd.innerHTML = j.log.length ? '' : '<p class="empty">아직 기록이 없어요.</p>';
+  j.log.forEach(l => { const d = document.createElement('div'); const what = l.what === '입장' ? '들어왔어요' : l.what === '완료' ? `<b>${esc(l.step)}</b> 완료` : `${esc(l.step)} 완료 취소`;
+    d.innerHTML = `<time>${hm(l.t)}</time><span><b>${esc(l.name)}</b> · ${what}</span>`; fd.append(d); });
+  $('upd').textContent = '마지막으로 본 시각 ' + hm(now.toISOString());
+}
+async function refresh() {
+  try { const j = await fetchStat(pw); if (!j.ok) { logout(j.err); return; } render(j); }
+  catch (e) { $('upd').textContent = '불러오지 못했어요(인터넷 확인) · 잠시 뒤 다시 시도해요'; }
+}
+function start() { $('gate').hidden = true; $('app').hidden = false; refresh(); schedule(); }
+function schedule() { clearInterval(timer); if ($('auto').checked) timer = setInterval(() => { if (!document.hidden) refresh(); }, 20000); }
+function logout(msg) { try { sessionStorage.removeItem(PK); } catch (e) {} pw = ''; clearInterval(timer); $('app').hidden = true; $('gate').hidden = false; $('gerr').textContent = msg || ''; }
+$('gf').addEventListener('submit', async e => { e.preventDefault(); const v = $('pw').value.trim(); $('gerr').textContent = '확인하는 중…';
+  try { const j = await fetchStat(v); if (!j.ok) { $('gerr').textContent = j.err || '비밀번호가 맞지 않아요'; return; }
+    pw = v; try { sessionStorage.setItem(PK, pw); } catch (e2) {} $('gerr').textContent = ''; $('gate').hidden = true; $('app').hidden = false; render(j); schedule(); }
+  catch (err) { $('gerr').textContent = '서버에 닿지 못했어요. 인터넷을 확인해 주세요.'; } });
+$('reload').addEventListener('click', refresh);
+$('auto').addEventListener('change', schedule);
+if (pw) start(); else setTimeout(() => $('pw').focus(), 50);
+</script>
+</body>
+</html>
