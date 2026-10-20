@@ -140,6 +140,16 @@ footer .in{padding-block:36px 60px;font-size:13px;color:var(--muted);display:fle
   .two,.tips{grid-template-columns:minmax(0,1fr)}
 }
 .frame img{cursor:zoom-in}
+.gate{position:fixed;inset:0;z-index:40;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) max(20px,env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px))}
+.gate form{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:30px 28px;display:flex;flex-direction:column;gap:14px}
+.gate .mark{font-size:14px}.gate h2{font-size:26px}.gate p{color:var(--muted);font-size:15px}
+.gate input{font:inherit;font-size:17px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg);color:var(--ink)}
+.gate input:focus{outline:2px solid var(--clay);outline-offset:1px}
+.gate button{font:inherit;font-size:16px;font-weight:700;border:none;border-radius:12px;padding:12px;background:var(--ink);color:var(--bg);cursor:pointer}
+.gate .err{color:var(--clay-ink);font-size:14px;min-height:20px}
+.who{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);white-space:nowrap}
+.who b{color:var(--ink)}.who button{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:99px;padding:1px 8px;cursor:pointer}
+.sync{font-size:12px;color:var(--muted);min-height:18px}
 .lb{position:fixed;inset:0;z-index:30;background:rgba(20,20,19,.82);display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));cursor:zoom-out}
 .lb img{max-width:min(1400px,100%);max-height:100%;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
@@ -151,7 +161,19 @@ footer .in{padding-block:36px 60px;font-size:13px;color:var(--muted);display:fle
   <div class="mark"><i>K</i>집필진 연수</div>
   <nav class="steps-mini" id="mini" aria-label="단계 바로 가기"></nav>
   <span class="prog" id="prog">0 / 10</span>
+  <span class="who" id="who" hidden><b id="whoName"></b> 선생님 <button type="button" id="whoChange">바꾸기</button></span>
 </div></header>
+<div class="gate" id="gate" hidden>
+  <form id="gateForm" autocomplete="on">
+    <div class="mark"><i>K</i>집필진 연수</div>
+    <h2>이름을 알려 주세요</h2>
+    <p>‘다 했어요’를 누르면 진행 상황이 대표 교사에게 전해집니다. 다른 컴퓨터에서 같은 이름으로 들어오면 이어서 볼 수 있어요.</p>
+    <label for="gateName" style="font-size:14px;font-weight:700">이름</label>
+    <input id="gateName" name="name" maxlength="30" placeholder="예: 홍길동" required>
+    <div class="err" id="gateErr"></div>
+    <button type="submit">들어가기</button>
+  </form>
+</div>
 
 <section class="hero gut"><div class="in">
   <div>
@@ -427,20 +449,42 @@ footer .in{padding-block:36px 60px;font-size:13px;color:var(--muted);display:fle
 
 <script>
 const steps = [...document.querySelectorAll('.step')];
-const KEY = 'ksl-training-done-v2';
-let done = {}; try { done = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) {}
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (e) {} };
+// 진행 기록 서버: 검토 의견 구글 시트의 Apps Script(‘연수 현황’·‘연수 기록’ 시트에 적힘)
+const API = 'https://script.google.com/macros/s/AKfycbyyVQ9bYSSTL5T0yYCiYR_xMSjfuE04w0ZHRJoC4DZLVoZPCOn9E2EVxwMrGGSf3OZlew/exec';
+const NKEY = 'ksl-training-name';
+let me = ''; try { me = localStorage.getItem(NKEY) || ''; } catch (e) {}
+const key = () => 'ksl-training-done-v2:' + me;
+let done = {};
+const load = () => { try { done = JSON.parse(localStorage.getItem(key()) || '{}') || {}; } catch (e) { done = {}; } };
+const save = () => { try { localStorage.setItem(key(), JSON.stringify(done)); } catch (e) {} };
+async function send(body) {
+  try { const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ act: 'train', name: me }, body)) });
+    const j = await r.json(); if (j.ok && j.done) { Object.keys(j.done).forEach(k => done[k] = true); save(); draw(); } return j.ok;
+  } catch (e) { return false; }
+}
+function enter(name) {
+  me = name; try { localStorage.setItem(NKEY, me); } catch (e) {}
+  load(); draw(); document.getElementById('gate').hidden = true;
+  const w = document.getElementById('who'); w.hidden = false; document.getElementById('whoName').textContent = me;
+  send({ kind: 'enter' });
+}
+document.getElementById('gateForm').addEventListener('submit', e => { e.preventDefault(); const v = document.getElementById('gateName').value.replace(/\s+/g, ' ').trim();
+  if (v.length < 2) { document.getElementById('gateErr').textContent = '이름을 두 글자 이상 적어 주세요.'; return; } enter(v); });
+document.getElementById('whoChange').addEventListener('click', () => { document.getElementById('gateName').value = me; document.getElementById('gate').hidden = false; document.getElementById('gateName').focus(); });
 const mini = document.getElementById('mini');
 steps.forEach((s, i) => {
   const a = document.createElement('a'); a.href = '#' + s.id; a.textContent = i; a.title = s.dataset.t; mini.append(a);
-  s.querySelector('.done-btn').addEventListener('click', () => { done[s.id] = !done[s.id]; save(); draw(); if (done[s.id] && steps[i + 1]) steps[i + 1].scrollIntoView({ block: 'start' }); });
+  const btn = s.querySelector('.done-btn'); const sy = document.createElement('span'); sy.className = 'sync'; btn.after(sy);
+  btn.addEventListener('click', async () => { done[s.id] = !done[s.id]; save(); draw(); const on = done[s.id];
+    sy.textContent = '전하는 중…'; const ok = await send({ step: i, done: on }); sy.textContent = ok ? (on ? '대표 교사에게 전했어요' : '완료를 취소했어요') : '전하지 못했어요(인터넷 확인) — 이 컴퓨터에는 표시가 남아요';
+    if (on && steps[i + 1]) setTimeout(() => steps[i + 1].scrollIntoView({ block: 'start' }), 500); });
 });
 function draw() {
   let n = 0;
   steps.forEach((s, i) => { const on = !!done[s.id]; if (on) n++; const b = s.querySelector('.done-btn'); b.classList.toggle('on', on); b.textContent = on ? '✓ 다 했어요' : '다 했어요'; mini.children[i].classList.toggle('done', on); });
   document.getElementById('prog').textContent = n + ' / ' + steps.length;
 }
-draw();
+if (me) enter(me); else { document.getElementById('gate').hidden = false; draw(); setTimeout(() => document.getElementById('gateName').focus(), 50); }
 document.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', () => {
   const q = b.parentElement.querySelector('q'), t = q.textContent;
   const ok = () => { b.textContent = '복사됨'; b.classList.add('ok'); setTimeout(() => { b.textContent = '복사'; b.classList.remove('ok'); }, 1500); };
