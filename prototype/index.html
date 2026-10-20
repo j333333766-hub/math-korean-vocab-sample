@@ -281,9 +281,9 @@ svg.fig{width:100%;height:100%;max-height:100%;max-width:100%}
 .card .f{color:#fff;font-size:2.6em;font-weight:800}
 .card .b{transform:rotateY(180deg);background:#eafaf5;border:.2em solid var(--teal)}
 .card .b .cap{font-size:.92em;font-weight:700;text-align:center;margin-top:.2em}
-.card.withread{height:57%;width:60%}.card.withread .f{font-size:2.3em}
-.cdread{width:92%;display:flex;flex-direction:column;align-items:center;gap:.35em;margin-top:.5em}.cdrq{font-size:.8em;font-weight:800;color:#374151}
-.say.sm{font-size:1em;padding:.35em .9em;width:100%;box-sizing:border-box}
+.card.withread{height:63%;width:64%}.card.withread .b{padding:.3em .6em}.card.withread .b .cap{margin-top:0}.card.withread .f{font-size:2.3em}
+.cdread{width:92%;display:flex;flex-direction:column;align-items:center;gap:.3em;margin-top:.35em}.cdrq{font-size:.8em;font-weight:800;color:#374151}
+.say.sm{font-size:.95em;padding:.25em .9em;width:100%;box-sizing:border-box}
 /* 듣기 · 말하기 */
 .say{width:92%;border:.14em solid #111;border-radius:.8em;padding:.6em 1em;display:flex;align-items:center;gap:.8em;font-size:1.25em;font-weight:800}
 .say span{flex:1}
@@ -1416,7 +1416,9 @@ R.vodCuts=sc=>{
   R._cleanup=stop; draw(); return true;
 };
 R.motion=sc=>{ const pad=frame(sc.q||'오늘 배울 낱말이에요.'); const m=el('div','motion'); sc.words.forEach((w,i)=>{const d=el('div','notranslate',w); m.append(d); setTimeout(()=>d.classList.add('in'),300+i*600);}); pad.append(m); };
-R.card_flip=sc=>{ const pad=frame(sc.q); const c=el('div','card'); const side=s=>s.fig?('<div class="figbox">'+fig(s.fig)+'</div>'+(s.caption?'<div class="cap">'+rich(s.caption)+'</div>':'')):('<div>'+rich(s.text)+'</div>'+(s.caption?'<div class="cap" style="color:#fff;font-size:.36em;font-weight:700">'+rich(s.caption)+'</div>':''));
+R.card_flip=sc=>{ const pad=frame(sc.q); const c=el('div','card');
+  if(sc.read&&sc.back&&sc.back.fig&&sc.back.fig.kind==='eq'&&!sc.back.fig.size) sc=Object.assign({},sc,{back:Object.assign({},sc.back,{fig:Object.assign({},sc.back.fig,{size:sc.back.fig.lines.length>1?54:72})})});   // 따라 읽기와 한 화면이면 카드가 작아지므로 식 글자를 키운다
+  const side=s=>s.fig?('<div class="figbox">'+fig(s.fig)+'</div>'+(s.caption?'<div class="cap">'+rich(s.caption)+'</div>':'')):('<div>'+rich(s.text)+'</div>'+(s.caption?'<div class="cap" style="color:#fff;font-size:.36em;font-weight:700">'+rich(s.caption)+'</div>':''));
   c.innerHTML='<div class="in"><div class="f">'+side(sc.front)+'</div><div class="b">'+side(sc.back)+'</div></div>';
   if(sc.front.fig){ $('.f',c).style.cssText='background:#eafaf5;border:.08em solid var(--teal);font-size:1em;color:inherit'; }
   if(!sc.back.fig){ $('.b',c).style.cssText+='font-size:2.2em;font-weight:900;color:#0c7d66'; $('.b .cap',c)&&($('.b .cap',c).style.cssText='font-size:.42em;color:#1d2433;font-weight:700;margin-top:.5em;padding:0 1em'); }
