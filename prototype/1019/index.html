@@ -1685,7 +1685,7 @@ const CIRC='①②③④⑤⑥⑦⑧⑨⑩';
 //  이름은 이 기기에 기억하고, 비밀번호는 브라우저를 닫을 때까지만(sessionStorage) 기억한다.
 const cauth={ get(){ try{ return JSON.parse(sessionStorage.getItem('vocabcmt:auth')||'null'); }catch(e){ return null; } }, set(v){ try{ v?sessionStorage.setItem('vocabcmt:auth',JSON.stringify(v)):sessionStorage.removeItem('vocabcmt:auth'); }catch(e){} } };
 let cpart=0, citems=[], cedit=null, call=false, cstep='name';
-async function cmtApi(b){ const url=LESSON.comment&&LESSON.comment.url; if(!url) throw new Error('기록 주소 없음');
+async function cmtApi(b){ const url=null; if(!url) throw new Error('기록 주소 없음');
   const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(b)}); const j=await r.json(); if(!j.ok) throw new Error(j.error||'기록 실패'); return j; }
 const cesc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // 지금 화면의 자리: 영상(대본)은 컷 번호까지(예: 3-1-2)
@@ -1909,7 +1909,7 @@ function init(){
   $('#prevMod').onclick=()=>{ if(mi>0){mi--;si=0;render();} }; $('#nextMod').onclick=()=>{ if(mi<LESSON.modules.length-1){mi++;si=0;render();} };
   initChat(); progInit();
   { const rb=$('#resetBtn'); let arm=0; rb.onclick=()=>{ if(!arm){ arm=1; rb.textContent='한 번 더 누르면 지워요'; setTimeout(()=>{ arm=0; rb.innerHTML='↺<span> 기록 지우기</span>'; },3000); return; } arm=0; prog.clear(); rwd.clear(); rb.innerHTML='↺<span> 기록 지우기</span>'; render(); }; }
-  $('#cmtBtn').onclick=openComment;
+  $('#cmtBtn').onclick=()=>{ location.href='../'; };   // 10/19 판(보관): 검토 의견은 10/20 판에서만 기록
   if(LESSON.ask&&LESSON.ask.url){ $('#askBtn').style.display=''; $('#askBtn').onclick=openAsk; }
   $('#memoBtn').onclick=()=>{ memoOn=!memoOn; $('#memo').classList.toggle('on',memoOn); $('#memoBtn').classList.toggle('on',memoOn); render(); };
   const hc=location.hash.match(/#\d+-\d+-(\d+)/); if(hc) window.__cut=hc[1]-1;
@@ -1933,6 +1933,14 @@ function syncLang(code){ const sel=document.getElementById('langSel'); if(sel) s
   sel.innerHTML='<option value="">번역 · Translate</option>'+LANGS.map(l=>'<option value="'+l[0]+'">'+l[1]+' ('+l[2]+')</option>').join('');
   sel.onchange=()=>setLang(sel.value); document.getElementById('langReset').onclick=()=>setLang(''); syncLang(curLang()); })();
 function googleTranslateElementInit(){ new google.translate.TranslateElement({pageLanguage:'ko',includedLanguages:'en,zh-CN,zh-TW,vi,ru,km,ja,tl,kk,mn,ar,uz,th,ne,my,id,fr,es',autoDisplay:false},'google_translate_element'); }
+</script>
+<script>
+// 10/19 판(보관용): 검토 의견은 10/20 판에서만 기록한다
+(function(){ const go=()=>{ const b=document.getElementById('cmtBtn'); if(b){ b.textContent='💬 의견은 10/20 판에서'; b.title='이 판은 고치기 전(10/19) 판이라 검토 의견을 기록하지 않아요. 누르면 10/20 판으로 가요.'; }
+  const d=document.createElement('div'); d.innerHTML='고치기 전 <b>10/19 판</b>(보관용)입니다. 검토 의견은 <a href="../" style="color:#fff;text-decoration:underline">10/20 판</a>에서 남겨 주세요.';
+  d.style.cssText='position:fixed;left:50%;bottom:8px;transform:translateX(-50%);z-index:9999;background:#e8457a;color:#fff;font:700 14px/1.4 sans-serif;padding:6px 14px;border-radius:999px;box-shadow:0 4px 12px rgba(0,0,0,.2);max-width:92vw;text-align:center';
+  document.body.append(d); };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go); else go(); })();
 </script>
 </body>
 </html>
