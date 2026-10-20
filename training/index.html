@@ -5,282 +5,453 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <title>클로드 코드 집필 연수</title>
-<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}*,*::before,*::after{box-sizing:border-box}</style>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap">
 <style>
-/* 레이아웃: 왼쪽에 진행 막대(단계 목록), 오른쪽에 단계 카드가 위에서 아래로. 휴대폰에서는 한 줄 */
+/* 레이아웃: 위 진행 막대 + 단계마다 [할 일 | 화면] 두 칸. 따뜻한 아이보리 바탕, 클레이 오렌지 포인트, 세리프 제목 */
 :root{
-  --bg:#f3f6f5; --paper:#ffffff; --ink:#18302c; --muted:#5d716c; --line:#d6e0dd;
-  --accent:#13866f; --accent-soft:#e1f3ee; --warn:#b35c00; --warn-soft:#fff2df; --code:#eef3f1;
-  --display:"Gowun Batang","Noto Serif KR",serif; --body:"IBM Plex Sans KR","Malgun Gothic",system-ui,sans-serif; --mono:"IBM Plex Mono",Consolas,monospace;
+  --bg:#faf9f5; --surface:#ffffff; --sunk:#f0eee6; --ink:#141413; --muted:#6b6a63; --line:#e6e3d8;
+  --clay:#d97757; --clay-ink:#b2532f; --clay-soft:#f7e8e0; --olive:#5f7a45; --olive-soft:#e8eedf; --amber:#9a6a00; --amber-soft:#faf0d9;
+  --serif:"Noto Serif KR","Georgia",serif; --sans:"Noto Sans KR","Malgun Gothic",system-ui,sans-serif; --mono:"JetBrains Mono",Consolas,monospace;
+  --shadow:0 1px 2px rgba(20,20,19,.05),0 10px 30px -12px rgba(20,20,19,.18);
+  color-scheme:light;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111917;--paper:#18221f;--ink:#e3eeeb;--muted:#9db1ab;--line:#2c3c38;--accent:#3fc4a5;--accent-soft:#1b3a33;--warn:#f0a35a;--warn-soft:#3a2a16;--code:#1f2d29;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#111917;--paper:#18221f;--ink:#e3eeeb;--muted:#9db1ab;--line:#2c3c38;--accent:#3fc4a5;--accent-soft:#1b3a33;--warn:#f0a35a;--warn-soft:#3a2a16;--code:#1f2d29;color-scheme:dark}
-body{background:var(--bg);color:var(--ink);font:16px/1.7 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.wrap{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:240px minmax(0,1fr);gap:32px;padding-block:28px 80px}
-h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.35;margin:0}
-h1{font-size:30px}h2{font-size:23px}h3{font-size:17px;font-family:var(--body);font-weight:700}
-p{margin:0}a{color:var(--accent)}
-.hero{grid-column:1/-1;display:flex;flex-direction:column;gap:10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
-.hero .eyebrow{font-size:13px;letter-spacing:.08em;color:var(--accent);font-weight:700}
-.hero p{color:var(--muted);max-width:68ch}
-.facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
-.facts span{font-size:13px;background:var(--paper);border:1px solid var(--line);border-radius:99px;padding:3px 12px}
-/* 진행 막대 */
-nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);align-self:start;display:flex;flex-direction:column;gap:2px}
-nav .prog{font-size:13px;color:var(--muted);margin-bottom:8px}
-nav .bar{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:12px}nav .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
-nav a{display:flex;gap:10px;align-items:center;text-decoration:none;color:var(--ink);font-size:14px;padding:5px 8px;border-radius:8px}
-nav a:hover{background:var(--paper)}
-nav a b{flex:none;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line);display:inline-flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);background:var(--paper)}
-nav a.done b{background:var(--accent);border-color:var(--accent);color:#fff}
-main{display:flex;flex-direction:column;gap:22px;min-width:0}
-.step{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:22px 24px;display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
-.step header{display:flex;gap:14px;align-items:flex-start}
-.num{flex:none;font-family:var(--display);font-size:22px;color:var(--accent);min-width:34px}
-.step header div{display:flex;flex-direction:column;gap:2px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#262624;--surface:#30302e;--sunk:#1f1e1d;--ink:#f0eee6;--muted:#a8a59b;--line:#3e3d39;--clay:#e08a6c;--clay-ink:#f0a184;--clay-soft:#45302a;--olive:#a7c08a;--olive-soft:#2f3828;--amber:#e6b85c;--amber-soft:#3b3220;--shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#262624;--surface:#30302e;--sunk:#1f1e1d;--ink:#f0eee6;--muted:#a8a59b;--line:#3e3d39;--clay:#e08a6c;--clay-ink:#f0a184;--clay-soft:#45302a;--olive:#a7c08a;--olive-soft:#2f3828;--amber:#e6b85c;--amber-soft:#3b3220;--shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.75 var(--sans);-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:var(--clay-ink);text-underline-offset:3px}
+h1,h2,h3{font-family:var(--serif);font-weight:700;margin:0;text-wrap:balance;letter-spacing:-.01em}
+p{margin:0}
+.gut{padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.in{max-width:1160px;margin:0 auto}
+/* 위 막대 */
+.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .in{display:flex;align-items:center;gap:14px;height:58px}
+.mark{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;white-space:nowrap}
+.mark i{width:26px;height:26px;border-radius:8px;background:var(--clay);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-style:normal;font-family:var(--serif);font-size:15px}
+.steps-mini{display:flex;gap:4px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+.steps-mini a{flex:none;width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--muted);text-decoration:none;border:1px solid var(--line);background:var(--surface)}
+.steps-mini a.done{background:var(--clay);border-color:var(--clay);color:#fff}
+.prog{font-size:13px;color:var(--muted);white-space:nowrap}
+/* 첫 화면 */
+.hero .in{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:48px;align-items:center;padding-block:64px 56px}
+.eyebrow{font-size:13px;font-weight:700;color:var(--clay-ink);letter-spacing:.06em}
+.hero h1{font-size:46px;line-height:1.22;margin:12px 0 16px}
+.hero h1 em{font-style:normal;color:var(--clay)}
+.lead{font-size:18px;color:var(--muted);max-width:34em}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.chips span{font-size:13px;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:4px 12px}
+.cta{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;font:inherit;font-size:15px;font-weight:700;border-radius:12px;padding:10px 18px;text-decoration:none;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn.dark{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.frame{border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow)}
+.frame .bar{display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--sunk);font-size:12px;color:var(--muted)}
+.frame .bar i{width:10px;height:10px;border-radius:50%;background:var(--line);display:inline-block}
+figure{margin:0;display:flex;flex-direction:column;gap:8px;min-width:0}
+figcaption{font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.tag{font-size:11px;font-weight:700;border-radius:99px;padding:1px 8px;letter-spacing:.02em}
+.tag.real{background:var(--olive-soft);color:var(--olive)}.tag.draw{background:var(--clay-soft);color:var(--clay-ink)}
+/* 흐름 */
+.flow{border-block:1px solid var(--line);background:var(--surface)}
+.flow .in{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;padding-block:22px}
+.flow a{display:flex;flex-direction:column;gap:2px;padding:6px 16px;text-decoration:none;color:var(--ink);border-left:1px solid var(--line)}
+.flow a:first-child{border-left:none}
+.flow b{font-family:var(--serif);font-size:17px}.flow span{font-size:13px;color:var(--muted)}
+/* 단계 */
+.step .in{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:48px;padding-block:64px;border-bottom:1px solid var(--line);align-items:start}
+.step:nth-of-type(even){background:var(--sunk)}
+.step .txt{display:flex;flex-direction:column;gap:16px;min-width:0;position:sticky;top:84px}
+.num{display:inline-flex;align-items:center;gap:10px;font-size:13px;font-weight:700;color:var(--clay-ink)}
+.num b{width:30px;height:30px;border-radius:50%;background:var(--clay);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+.step h2{font-size:30px;line-height:1.3}
 .time{font-size:13px;color:var(--muted)}
-ol.do,ul.do{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px}
-ol.do li::marker{color:var(--accent);font-weight:700}
-.see{border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 14px;border-radius:0 10px 10px 0;font-size:15px}
-.see b{color:var(--accent)}
-.caution{border-left:3px solid var(--warn);background:var(--warn-soft);padding:10px 14px;border-radius:0 10px 10px 0;font-size:15px}
-.caution b{color:var(--warn)}
-.say{display:flex;gap:10px;align-items:center;background:var(--code);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
-.say q{flex:1;min-width:0;quotes:none;font-weight:500}
-.say button,.chk{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:4px 10px;cursor:pointer;flex:none}
-.say button.ok{border-color:var(--accent);color:var(--accent)}
-code,kbd{font-family:var(--mono);font-size:.88em;background:var(--code);border:1px solid var(--line);border-radius:5px;padding:0 5px}
-.chk{align-self:flex-start;display:inline-flex;gap:8px;align-items:center;font-size:14px;padding:6px 14px}
-.chk.on{background:var(--accent);border-color:var(--accent);color:#fff}
-.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.mini{border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
-.mini h3{font-size:15px}
-.tbl{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}th{color:var(--muted);font-weight:500;white-space:nowrap}
-details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:var(--paper)}
-details+details{margin-top:8px}
-summary{cursor:pointer;font-weight:700}
-details p,details ul{margin-top:8px}
-.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:14px}
-.flow span{background:var(--accent-soft);color:var(--ink);border-radius:8px;padding:3px 10px}
-.flow i{color:var(--muted);font-style:normal}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-@media (max-width:860px){.wrap{grid-template-columns:minmax(0,1fr)}nav{position:static;flex-direction:row;flex-wrap:wrap;gap:4px}nav .prog,nav .bar{width:100%}nav a span{display:none}.grid2{grid-template-columns:minmax(0,1fr)}.step{padding:18px 16px}h1{font-size:25px}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+ol.do{margin:0;padding:0;list-style:none;counter-reset:d;display:flex;flex-direction:column;gap:12px}
+ol.do>li{counter-increment:d;display:grid;grid-template-columns:26px 1fr;gap:10px}
+ol.do>li::before{content:counter(d);width:24px;height:24px;border-radius:50%;border:1.5px solid var(--clay);color:var(--clay-ink);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-top:3px}
+.note{border-radius:12px;padding:12px 14px;font-size:15px;display:flex;gap:10px}
+.note b{white-space:nowrap}
+.note.ok{background:var(--olive-soft)}.note.ok b{color:var(--olive)}
+.note.warn{background:var(--amber-soft)}.note.warn b{color:var(--amber)}
+.ask{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:10px 10px 10px 16px;box-shadow:var(--shadow)}
+.ask q{quotes:none;flex:1;min-width:0;font-weight:500}
+.ask button{flex:none;font:inherit;font-size:13px;font-weight:700;border:none;border-radius:10px;padding:7px 12px;background:var(--clay);color:#fff;cursor:pointer}
+.ask button.ok{background:var(--olive)}
+.asks{display:flex;flex-direction:column;gap:10px}
+code{font-family:var(--mono);font-size:.86em;background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+.step:nth-of-type(even) code{background:var(--surface)}
+.done-btn{align-self:flex-start;font:inherit;font-size:14px;font-weight:700;border-radius:99px;padding:8px 16px;border:1.5px solid var(--clay);background:transparent;color:var(--clay-ink);cursor:pointer}
+.done-btn.on{background:var(--clay);color:#fff}
+.figs{display:flex;flex-direction:column;gap:22px;min-width:0}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+/* 앱 그림 */
+.app{display:grid;grid-template-columns:150px 1fr;min-height:300px;font-size:13px}
+.app .side{background:var(--sunk);border-right:1px solid var(--line);padding:12px 10px;display:flex;flex-direction:column;gap:4px}
+.app .side span{padding:6px 10px;border-radius:8px;color:var(--muted)}
+.app .side span.on{background:var(--clay-soft);color:var(--clay-ink);font-weight:700}
+.app .main{padding:22px;display:flex;flex-direction:column;gap:14px;justify-content:center}
+.app .hi{font-family:var(--serif);font-size:22px;text-align:center}
+.fold{align-self:center;display:inline-flex;gap:8px;align-items:center;border:1px dashed var(--clay);background:var(--clay-soft);border-radius:10px;padding:6px 12px;font-weight:700;color:var(--clay-ink)}
+.inbox{border:1px solid var(--line);border-radius:16px;padding:12px 14px;background:var(--surface);color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+.inbox i{width:28px;height:28px;border-radius:8px;background:var(--clay);display:inline-block}
+.chat{padding:18px;display:flex;flex-direction:column;gap:12px;font-size:14px}
+.chat .me{align-self:flex-end;background:var(--sunk);border-radius:14px;padding:8px 12px;max-width:80%}
+.chat .ai{display:flex;flex-direction:column;gap:6px}
+.chat .tool{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:5px 9px;background:var(--sunk)}
+.chat .tool b{color:var(--olive)}
+.perm{padding:18px;display:flex;flex-direction:column;gap:12px;font-size:14px}
+.perm .cmd{font-family:var(--mono);font-size:12px;background:var(--sunk);border:1px solid var(--line);border-radius:8px;padding:8px 10px;overflow-x:auto;white-space:nowrap}
+.perm .acts{display:flex;gap:8px;flex-wrap:wrap}
+.perm .acts span{border:1px solid var(--line);border-radius:10px;padding:6px 12px;font-weight:700;font-size:13px}
+.perm .acts span.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.exp{font-size:14px}
+.exp .row{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:center;padding:7px 14px;border-bottom:1px solid var(--line)}
+.exp .row:last-child{border-bottom:none}
+.exp .row small{color:var(--muted)}
+.exp .row.key{background:var(--clay-soft)}
+.ico{width:22px;height:18px;border-radius:3px;background:#e8b84a;position:relative}.ico.f{background:#c9d4e6;width:18px;height:22px}
+.menu{padding:10px;font-size:14px;display:flex;flex-direction:column;gap:2px;max-width:280px}
+.menu span{padding:6px 12px;border-radius:6px}.menu span.on{background:var(--clay-soft);color:var(--clay-ink);font-weight:700}
+.menu hr{border:none;border-top:1px solid var(--line);margin:4px 0}
+/* 막힐 때 */
+.faq .in{padding-block:64px;display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:48px}
+details{border-bottom:1px solid var(--line);padding:14px 2px}
+summary{cursor:pointer;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--clay);font-size:20px;line-height:1}
+details[open] summary::after{content:"−"}
+details p{margin-top:8px;color:var(--muted)}
+.tips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:22px}
+.tip{border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--surface)}
+.tip h3{font-size:17px;margin-bottom:6px}
+.tip p{font-size:14px;color:var(--muted)}
+footer .in{padding-block:36px 60px;font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px 18px}
+:focus-visible{outline:2px solid var(--clay);outline-offset:3px;border-radius:6px}
+@media (max-width:900px){
+  .hero .in,.step .in,.faq .in{grid-template-columns:minmax(0,1fr);gap:28px}
+  .step .txt{position:static}
+  .hero h1{font-size:34px}.step h2{font-size:25px}
+  .flow .in{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.flow a{border-left:none}
+  .steps-mini{display:none}.app{grid-template-columns:110px 1fr}
+  .two,.tips{grid-template-columns:minmax(0,1fr)}
+}
+.frame img{cursor:zoom-in}
+.lb{position:fixed;inset:0;z-index:30;background:rgba(20,20,19,.82);display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));cursor:zoom-out}
+.lb img{max-width:min(1400px,100%);max-height:100%;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
 
+<header class="top gut"><div class="in">
+  <div class="mark"><i>K</i>집필진 연수</div>
+  <nav class="steps-mini" id="mini" aria-label="단계 바로 가기"></nav>
+  <span class="prog" id="prog">0 / 10</span>
+</div></header>
 
-<div class="wrap">
-  <section class="hero">
+<section class="hero gut"><div class="in">
+  <div>
     <span class="eyebrow">이주배경 학생 중학교 수학 한국어 어휘 · 집필진 연수</span>
-    <h1>클로드 코드로 차시 만들기</h1>
-    <p>이 페이지만 보고 혼자서도 끝까지 따라 할 수 있게 만들었습니다. 위에서부터 차례로 하고, 단계를 마칠 때마다 <b>“다 했어요”</b>를 눌러 주세요. 표시한 단계는 이 브라우저에 남아서, 페이지를 다시 열어도 이어서 할 수 있습니다.</p>
-    <div class="facts"><span>Windows 컴퓨터</span><span>Claude 데스크톱 앱 · Code</span><span>모두 약 80분</span><span>키트: KSL수학어휘_차시개발키트</span></div>
-  </section>
+    <h1>클로드 코드로<br><em>차시 하나</em> 만들어 보기</h1>
+    <p class="lead">이 페이지만 보고 혼자서도 끝까지 따라 할 수 있어요. 단계마다 왼쪽은 할 일, 오른쪽은 화면입니다. 끝나면 <b>다 했어요</b>를 눌러 주세요. 표시는 이 브라우저에 남습니다.</p>
+    <div class="chips"><span>Windows 컴퓨터</span><span>Claude 데스크톱 앱 · Code</span><span>약 80분</span></div>
+    <div class="cta"><a class="btn dark" href="#s0">시작하기</a><a class="btn" href="https://j333333766-hub.github.io/math-korean-vocab-sample/prototype/" target="_blank" rel="noopener">샘플 차시 먼저 보기</a></div>
+  </div>
+  <figure>
+    <div class="frame"><div class="bar"><i></i><i></i><i></i><span>오늘 만들 결과물 — 7차시 샘플처럼 생긴 내 차시</span></div><img src="img/sample-cards.jpg" alt="7차시 소인수분해 샘플의 오늘의 어휘 화면: 소인수분해와 거듭제곱 낱말 카드"></div>
+    <figcaption><span class="tag real">실제 화면</span>샘플 차시의 ‘오늘의 어휘’ 화면</figcaption>
+  </figure>
+</div></section>
 
-  <nav id="nav" aria-label="단계">
-    <div class="prog" id="prog">0 / 9 단계 완료</div>
-    <div class="bar"><i id="bar"></i></div>
-  </nav>
+<section class="flow gut"><div class="in">
+  <a href="#s1"><b>준비</b><span>구독 · 앱 설치</span></a>
+  <a href="#s3"><b>폴더</b><span>키트 받고 열기</span></a>
+  <a href="#s5"><b>첫 대화</b><span>작업 내용 파악</span></a>
+  <a href="#s7"><b>만들기</b><span>내 차시 한 개</span></a>
+  <a href="#s8"><b>고치기</b><span>말로 다듬기</span></a>
+</div></section>
 
-  <main id="steps">
+<main id="steps">
 
-    <article class="step" id="s0" data-title="준비물">
-      <header><span class="num">0</span><div><h2>시작 전에 준비할 것</h2><span class="time">5분</span></div></header>
-      <ul class="do">
-        <li><b>Windows 컴퓨터</b>와 인터넷. 학교 컴퓨터에서 프로그램 설치가 막혀 있으면 집이나 개인 노트북을 쓰세요.</li>
-        <li><b>Claude 계정과 결제 수단</b>: 유료 요금제(Pro)부터 클로드 코드를 쓸 수 있습니다.</li>
-        <li><b>시작 묶음 압축 파일</b>: <a href="https://drive.google.com/file/d/1Dl62btsq4oqlsjtziwtrCocwxMNjlEb-/view?usp=sharing" target="_blank" rel="noopener">구글 드라이브에서 <code>KSL수학어휘_시작 묶음(2026-10-20).zip</code> 내려받기</a>(92MB). 링크를 열고 오른쪽 위 <b>다운로드</b>(↓) 단추를 누르세요. “바이러스 검사를 할 수 없는 큰 파일” 안내가 나오면 <b>무시하고 다운로드</b>를 누르면 됩니다.</li>
-        <li><b>내가 맡은 차시 번호</b>: 대표 교사가 정해 준 담당 차시(예: 8차시, 9차시).</li>
-      </ul>
-      <button class="chk" type="button" id="c-s0">☐ 다 했어요</button>
-    </article>
+<section class="step gut" id="s0" data-t="준비물"><div class="in">
+  <div class="txt">
+    <span class="num"><b>0</b>시작 전에</span>
+    <h2>준비할 것 네 가지</h2><span class="time">5분</span>
+    <ol class="do">
+      <li><span><b>Windows 컴퓨터</b>와 인터넷. 학교 컴퓨터에서 설치가 막혀 있으면 개인 노트북을 쓰세요.</span></li>
+      <li><span><b>Claude 계정과 결제 수단</b>. 유료 요금제(Pro)부터 클로드 코드를 씁니다.</span></li>
+      <li><span><b>시작 묶음</b>을 내려받아 둡니다. <a href="https://drive.google.com/file/d/1Dl62btsq4oqlsjtziwtrCocwxMNjlEb-/view?usp=sharing" target="_blank" rel="noopener">구글 드라이브에서 받기 (92MB)</a> → 오른쪽 화면처럼 <b>다운로드</b>를 누르고, 바이러스 검사 안내가 나오면 <b>무시하고 다운로드</b>를 누릅니다.</span></li>
+      <li><span><b>내가 맡은 차시 번호</b>(대표 교사가 정해 준 담당 차시).</span></li>
+    </ol>
+    <button class="done-btn" type="button">다 했어요</button>
+  </div>
+  <div class="figs">
+    <figure><div class="frame"><img src="img/drive-view.jpg" alt="구글 드라이브의 시작 묶음 파일 화면. 가운데에 다운로드 단추"></div><figcaption><span class="tag real">실제 화면</span>링크를 열면 보이는 화면 — 가운데 <b>다운로드</b></figcaption></figure>
+    <figure><div class="frame"><img src="img/drive-warning.jpg" alt="Google Drive에서 파일에 바이러스가 있는지 검사할 수 없습니다 — 무시하고 다운로드 단추"></div><figcaption><span class="tag real">실제 화면</span>파일이 커서 나오는 안내 — <b>무시하고 다운로드</b></figcaption></figure>
+  </div>
+</div></section>
 
-    <article class="step" id="s1" data-title="구독하기">
-      <header><span class="num">1</span><div><h2>Claude 구독하기 (Pro)</h2><span class="time">10분</span></div></header>
-      <ol class="do">
-        <li>브라우저에서 <a href="https://claude.ai" target="_blank" rel="noopener">claude.ai</a>에 들어가 계정을 만들거나 로그인합니다(구글 계정 로그인도 됩니다).</li>
-        <li>왼쪽 아래 이름을 누르고 <b>설정 → 요금제(Plans)</b>로 가서 <b>Pro</b>를 고르고 결제합니다.</li>
-        <li>결제가 끝나면 화면 왼쪽 아래에 요금제가 Pro로 보이는지 확인합니다.</li>
-      </ol>
-      <div class="see"><b>이렇게 보이면 성공</b> · 설정의 요금제 화면에 현재 요금제가 Pro로 나옵니다.</div>
-      <div class="caution"><b>알아 둘 점</b> · Pro에는 일정 시간 동안 쓸 수 있는 양(사용 한도)이 있습니다. 한도에 닿으면 몇 시간 뒤 다시 쓸 수 있다는 안내가 나옵니다. 연수 날에는 연습을 너무 길게 이어 가지 마세요.</div>
-      <button class="chk" type="button" id="c-s1">☐ 다 했어요</button>
-    </article>
+<section class="step gut" id="s1" data-t="구독"><div class="in">
+  <div class="txt">
+    <span class="num"><b>1</b>구독</span>
+    <h2>Claude Pro 구독하기</h2><span class="time">10분</span>
+    <ol class="do">
+      <li><span>브라우저에서 <a href="https://claude.ai" target="_blank" rel="noopener">claude.ai</a>에 들어가 가입하거나 로그인합니다. 구글 계정 로그인도 됩니다.</span></li>
+      <li><span>왼쪽 아래 이름 → <b>설정 → 요금제</b>에서 <b>Pro</b>를 골라 결제합니다.</span></li>
+      <li><span>요금제 화면에 현재 요금제가 <b>Pro</b>로 보이면 끝입니다.</span></li>
+    </ol>
+    <div class="note warn"><b>알아 두기</b><span>Pro에는 일정 시간 동안 쓸 수 있는 양(사용 한도)이 있어요. 한도에 닿으면 몇 시간 뒤 다시 쓸 수 있다는 안내가 나옵니다.</span></div>
+    <button class="done-btn" type="button">다 했어요</button>
+  </div>
+  <div class="figs">
+    <figure><div class="frame"><div class="bar"><i></i><i></i><i></i><span>claude.ai · 설정 › 요금제</span></div>
+      <div class="app" style="grid-template-columns:150px 1fr;min-height:240px"><div class="side"><span>일반</span><span>계정</span><span class="on">요금제</span><span>개인정보</span></div>
+      <div class="main" style="justify-content:flex-start"><b style="font-family:var(--serif);font-size:18px">요금제</b>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="inbox" style="flex-direction:column;align-items:flex-start;gap:2px"><b style="color:var(--ink)">무료</b><small>기본 대화</small></div><div class="inbox" style="flex-direction:column;align-items:flex-start;gap:2px;border:2px solid var(--clay)"><b style="color:var(--clay-ink)">Pro ✓</b><small>클로드 코드 포함</small></div></div></div></div></div>
+      <figcaption><span class="tag draw">그림</span>요금제 화면을 간단히 그린 것(실제 화면과 조금 다를 수 있어요)</figcaption></figure>
+  </div>
+</div></section>
 
-    <article class="step" id="s2" data-title="앱 설치">
-      <header><span class="num">2</span><div><h2>Claude 데스크톱 앱 설치</h2><span class="time">10분</span></div></header>
-      <ol class="do">
-        <li><a href="https://claude.ai/download" target="_blank" rel="noopener">claude.ai/download</a>에서 <b>Windows</b>용을 내려받아 실행합니다.</li>
-        <li>설치가 끝나면 앱이 열립니다. <b>로그인</b>을 누르면 브라우저가 열리고, 1단계에서 쓴 계정으로 로그인하면 앱으로 돌아옵니다.</li>
-        <li>앱 왼쪽 메뉴에서 <b>Code</b>(클로드 코드)를 찾습니다. 오늘 작업은 모두 여기서 합니다.</li>
-      </ol>
-      <div class="caution"><b>설치 안내가 더 나오면</b> · Code를 처음 열 때 “Git for Windows”처럼 필요한 프로그램을 설치하라는 안내가 나오면, 안내의 링크에서 내려받아 <b>기본 설정 그대로</b> 설치한 뒤 앱을 다시 여세요.</div>
-      <div class="see"><b>왜 데스크톱 앱인가요?</b> · 명령어를 치는 검은 창(터미널) 없이, 폴더를 고르고 버튼으로 허락하는 방식이라 처음 쓰는 분에게 쉽습니다. 키트의 도구도 Claude가 대신 실행합니다.</div>
-      <button class="chk" type="button" id="c-s2">☐ 다 했어요</button>
-    </article>
+<section class="step gut" id="s2" data-t="앱 설치"><div class="in">
+  <div class="txt">
+    <span class="num"><b>2</b>설치</span>
+    <h2>Claude 데스크톱 앱 설치</h2><span class="time">10분</span>
+    <ol class="do">
+      <li><span><a href="https://claude.ai/download" target="_blank" rel="noopener">claude.ai/download</a>에서 <b>Windows용 다운로드</b>를 눌러 설치합니다.</span></li>
+      <li><span>앱이 열리면 <b>로그인</b> → 브라우저에서 1단계 계정으로 로그인하면 앱으로 돌아옵니다.</span></li>
+      <li><span>앱 왼쪽 메뉴의 <b>Code</b>를 찾아 둡니다. 오늘 작업은 모두 여기서 해요.</span></li>
+    </ol>
+    <div class="note warn"><b>안내가 더 나오면</b><span>Code를 처음 열 때 “Git for Windows”처럼 필요한 프로그램을 설치하라고 하면, 안내 링크에서 받아 <b>기본 설정 그대로</b> 설치한 뒤 앱을 다시 여세요.</span></div>
+    <button class="done-btn" type="button">다 했어요</button>
+  </div>
+  <div class="figs">
+    <figure><div class="frame"><img src="img/claude-download.jpg" alt="Claude 다운로드 페이지. Windows용 다운로드 단추"></div><figcaption><span class="tag real">실제 화면</span>claude.ai/download — <b>Windows용 다운로드</b></figcaption></figure>
+    <figure><div class="frame"><div class="bar"><i></i><i></i><i></i><span>Claude 데스크톱 앱</span></div>
+      <div class="app"><div class="side"><span>＋ 새 채팅</span><span>채팅</span><span>프로젝트</span><span class="on">Code</span></div>
+      <div class="main"><div class="hi">무엇을 만들어 볼까요?</div><div class="inbox">Code에서 작업을 시작해요<i></i></div></div></div></div>
+      <figcaption><span class="tag draw">그림</span>앱 왼쪽 메뉴의 <b>Code</b>(메뉴 이름·위치는 업데이트에 따라 조금 달라요)</figcaption></figure>
+  </div>
+</div></section>
 
-    <article class="step" id="s3" data-title="키트 폴더">
-      <header><span class="num">3</span><div><h2>작업 폴더(키트) 준비</h2><span class="time">5분</span></div></header>
-      <ol class="do">
-        <li>0단계에서 받은 <code>KSL수학어휘_시작 묶음(2026-10-20).zip</code>(보통 <b>다운로드</b> 폴더에 있습니다)을 마우스 오른쪽 단추로 누르고 <b>모두 압축 풀기</b>를 고릅니다.</li>
-        <li>풀린 폴더 안의 <code>KSL수학어휘_차시개발키트</code> 폴더를 <b>문서</b>처럼 찾기 쉬운 곳에 옮깁니다. <b>폴더 이름은 바꾸지 마세요.</b></li>
-        <li>폴더를 열어 아래 항목이 있는지 봅니다.</li>
-      </ol>
-      <div class="tbl"><table>
-        <tr><th>CLAUDE.md</th><td>Claude가 읽는 작업 지침(직접 고치지 않습니다)</td></tr>
-        <tr><th>먼저 읽기(선생님용).md</th><td>선생님용 짧은 안내</td></tr>
-        <tr><th>샘플</th><td>본보기 차시 <code>07_소인수분해(샘플).html</code>과 화면 캡처</td></tr>
-        <tr><th>자료</th><td>60차시 목록, 단계별 구성 가이드, 학습 어휘 목록</td></tr>
-        <tr><th>차시</th><td><b>내가 만드는 차시가 생기는 곳</b>(지금은 비어 있음)</td></tr>
-        <tr><th>내 설정.txt</th><td>‘지침 묻기’ 접속 암호</td></tr>
-      </table></div>
-      <div class="caution"><b>지키기</b> · <code>CLAUDE.md</code>, <code>자료</code>, <code>샘플</code>, <code>틀</code>, <code>도구</code>는 직접 고치지 마세요. 대표 교사가 고치면 작업을 시작할 때 저절로 최신으로 바뀝니다.</div>
-      <button class="chk" type="button" id="c-s3">☐ 다 했어요</button>
-    </article>
+<section class="step gut" id="s3" data-t="키트 폴더"><div class="in">
+  <div class="txt">
+    <span class="num"><b>3</b>폴더</span>
+    <h2>작업 폴더(키트) 준비</h2><span class="time">5분</span>
+    <ol class="do">
+      <li><span><b>다운로드</b> 폴더의 <code>KSL수학어휘_시작 묶음(2026-10-20).zip</code>을 오른쪽 클릭 → <b>모두 압축 풀기</b>.</span></li>
+      <li><span>안에 있는 <code>KSL수학어휘_차시개발키트</code> 폴더를 <b>문서</b>처럼 찾기 쉬운 곳에 둡니다. <b>폴더 이름은 그대로</b>.</span></li>
+      <li><span>폴더를 열어 오른쪽 그림처럼 생겼는지 봅니다. 내 차시는 <code>차시</code> 폴더에 생겨요.</span></li>
+    </ol>
+    <div class="note warn"><b>지키기</b><span><code>CLAUDE.md</code>, <code>자료</code>, <code>샘플</code>, <code>틀</code>, <code>도구</code>는 직접 고치지 마세요. 작업을 시작할 때 저절로 최신으로 바뀝니다.</span></div>
+    <button class="done-btn" type="button">다 했어요</button>
+  </div>
+  <div class="figs">
+    <figure><div class="frame"><div class="menu"><span>열기</span><span class="on">모두 압축 풀기…</span><hr><span>복사</span><span>이름 바꾸기</span><span>속성</span></div></div><figcaption><span class="tag draw">그림</span>zip 파일 오른쪽 클릭 메뉴</figcaption></figure>
+    <figure><div class="frame"><div class="bar"><i></i><i></i><i></i><span>문서 › KSL수학어휘_차시개발키트</span></div>
+      <div class="exp">
+        <div class="row key"><span class="ico"></span><b>차시</b><small>내 차시가 생기는 곳</small></div>
+        <div class="row"><span class="ico"></span>샘플<small>7차시 본보기</small></div>
+        <div class="row"><span class="ico"></span>자료<small>60차시 목록 · 구성 가이드</small></div>
+        <div class="row"><span class="ico"></span>도구 · 틀<small>Claude가 씀</small></div>
+        <div class="row"><span class="ico f"></span>CLAUDE.md<small>Claude가 읽는 지침</small></div>
+        <div class="row"><span class="ico f"></span>먼저 읽기(선생님용).md<small>짧은 안내</small></div>
+        <div class="row"><span class="ico f"></span>내 설정.txt<small>지침 묻기 암호</small></div>
+      </div></div><figcaption><span class="tag draw">그림</span>압축을 푼 키트 폴더</figcaption></figure>
+  </div>
+</div></section>
 
-    <article class="step" id="s4" data-title="폴더 열기">
-      <header><span class="num">4</span><div><h2>Code에서 키트 폴더 열기</h2><span class="time">5분</span></div></header>
-      <ol class="do">
-        <li>데스크톱 앱의 <b>Code</b>에서 새 작업(새 세션)을 시작하고, 작업할 폴더를 고르는 단추를 눌러 <code>KSL수학어휘_차시개발키트</code> 폴더를 고릅니다.</li>
-        <li>입력창 위나 옆에 고른 폴더 이름이 보이면 준비 완료입니다.</li>
-      </ol>
-      <div class="see"><b>허락 창이 뜨면</b> · Claude가 파일을 만들거나 도구(PowerShell 명령)를 실행하려 할 때 “허용할까요?”를 묻습니다. 키트 폴더 안의 작업이면 <b>허용</b>을 누르세요. 같은 종류를 계속 묻는 것이 번거로우면 “이번 대화 동안 허용”처럼 묶어 허락하는 단추를 써도 됩니다.</div>
-      <div class="caution"><b>앱 화면 모습</b> · 단추 이름과 위치는 앱이 업데이트되면서 조금 다를 수 있어요. ‘폴더 고르기’와 ‘새 세션’ 단추를 찾으면 됩니다.</div>
-      <button class="chk" type="button" id="c-s4">☐ 다 했어요</button>
-    </article>
+<section class="step gut" id="s4" data-t="폴더 열기"><div class="in">
+  <div class="txt">
+    <span class="num"><b>4</b>열기</span>
+    <h2>Code에서 키트 폴더 열기</h2><span class="time">5분</span>
+    <ol class="do">
+      <li><span>앱의 <b>Code</b>에서 새 작업을 시작하고, 폴더를 고르는 단추로 <code>KSL수학어휘_차시개발키트</code>를 고릅니다.</span></li>
+      <li><span>입력창 근처에 폴더 이름이 보이면 준비 끝.</span></li>
+      <li><span>Claude가 파일을 만들거나 도구를 실행할 때 <b>허락</b>을 묻습니다. 키트 폴더 안의 일이면 <b>허용</b>을 누르세요.</span></li>
+    </ol>
+    <div class="note ok"><b>편하게</b><span>같은 종류를 자꾸 물으면 “이번 대화 동안 허용”처럼 묶어서 허락하는 단추를 써도 됩니다.</span></div>
+    <button class="done-btn" type="button">다 했어요</button>
+  </div>
+  <div class="figs">
+    <figure><div class="frame"><div class="bar"><i></i><i></i><i></i><span>Code</span></div>
+      <div class="app"><div class="side"><span>＋ 새 작업</span><span class="on">Code</span><span>지난 작업</span></div>
+      <div class="main"><div class="fold">📁 KSL수학어휘_차시개발키트</div><div class="inbox">무엇을 도와드릴까요?<i></i></div></div></div></div>
+      <figcaption><span class="tag draw">그림</span>폴더를 고른 모습</figcaption></figure>
+    <figure><div class="frame"><div class="perm"><b>이 명령을 실행해도 될까요?</b><div class="cmd">powershell -File "도구\최신 지침 받기.ps1"</div><div class="acts"><span class="pri">허용</span><span>이번 대화 동안 허용</span><span>거부</span></div></div></div><figcaption><span class="tag draw">그림</span>허락 창 — 키트 안의 도구면 <b>허용</b></figcaption></figure>
+  </div>
+</div></section>
 
-    <article class="step" id="s5" data-title="첫 대화">
-      <header><span class="num">5</span><div><h2>첫 대화: 작업 내용 파악시키기</h2><span class="time">10분</span></div></header>
-      <ol class="do">
-        <li>입력창에 아래 문장을 붙여 넣고 보냅니다.</li>
-      </ol>
-      <div class="say"><q>폴더 내용을 읽고 작업 내용 파악해 줘.</q><button type="button" data-copy>복사</button></div>
-      <ol class="do" start="2">
-        <li>Claude가 먼저 세 가지를 스스로 합니다(1~2분). 허락 창이 뜨면 허용합니다.
-          <div class="flow" style="margin-top:6px"><span>최신 지침 받기</span><i>→</i><span>차시 틀 맞추기</span><i>→</i><span>검토위원 전체 지침 의견 받기</span></div></li>
-        <li>지침을 읽은 뒤 작업을 두세 문장으로 설명하고, <b>선생님 성함</b>과 <b>어느 차시부터 만들지</b> 묻습니다. 성함을 알려 주세요(차시 파일에 집필자로 적힙니다).</li>
-      </ol>
-      <div class="see"><b>이렇게 보이면 성공</b> · “최신 지침입니다” 또는 “지침을 새로 받았어요”라는 말과 함께, 오늘의 어휘 → 뜻 알아보기 → 교과서 맛보기 → 연습하기 → 정리하기 흐름을 설명합니다.</div>
-      <div class="caution"><b>인터넷 확인 실패라고 하면</b> · 학교망이 GitHub을 막는 경우입니다. 그대로 진행해도 되고, 나중에 다른 망에서 새 대화를 열면 최신 지침을 받습니다.</div>
-      <button class="chk" type="button" id="c-s5">☐ 다 했어요</button>
-    </article>
+<section class="step gut" id="s5" data-t="첫 대화"><div class="in">
+  <div class="txt">
+    <span class="num"><b>5</b>첫 대화</span>
+    <h2>작업 내용 파악시키기</h2><span class="time">10분</span>
+    <ol class="do">
+      <li><span>아래 문장을 복사해 입력창에 붙여 넣고 보냅니다.</span></li>
+    </ol>
+    <div class="ask"><q>폴더 내용을 읽고 작업 내용 파악해 줘.</q><button type="button" data-copy>복사</button></div>
+    <ol class="do" start="2" style="counter-reset:d 1">
+      <li><span>Claude가 <b>최신 지침 받기 → 차시 틀 맞추기 → 검토위원 의견 받기</b>를 스스로 합니다(1~2분).</span></li>
+      <li><span>작업을 짧게 설명하고 <b>선생님 성함</b>과 <b>어느 차시부터</b> 할지 묻습니다. 성함을 알려 주세요.</span></li>
+    </ol>
+    <div class="note warn"><b>인터넷 확인 실패</b><span>학교망이 GitHub을 막으면 나오는 말이에요. 그대로 진행해도 됩니다.</span></div>
+    <button class="done-btn" type="button">다 했어요</button>
+  </div>
+  <div class="figs">
+    <figure><div class="frame"><div class="chat">
+      <div class="me">폴더 내용을 읽고 작업 내용 파악해 줘.</div>
+      <div class="ai"><div class="tool"><b>✓</b> 최신 지침 받기 — 최신 지침입니다: 2026-10-20.1</div><div class="tool"><b>✓</b> 틀 맞추기 · 전체 지침 의견 받기</div>
+        <p>이 폴더는 이주배경 학생을 위한 중학교 수학 어휘 차시를 같은 틀로 만드는 작업 폴더예요. 차시마다 <b>오늘의 어휘 → 뜻 알아보기 → 교과서 맛보기 → 연습하기 → 정리하기</b> 순서로 만듭니다.</p>
+        <p>선생님 성함을 알려 주시겠어요? 그리고 <b>어느 차시부터 만들까요?</b></p></div>
+    </div></div><figcaption><span class="tag draw">그림</span>이렇게 대답하면 성공(문장은 조금씩 달라요)</figcaption></figure>
+  </div>
+</div></section>
 
-    <article class="step" id="s6" data-title="샘플 보기">
-      <header><span class="num">6</span><div><h2>샘플 차시 둘러보기</h2><span class="time">10분</span></div></header>
-      <ol class="do">
-        <li>파일 탐색기에서 <code>샘플\07_소인수분해(샘플).html</code>을 더블클릭하면 브라우저에서 열립니다. 인터넷 주소로 볼 수도 있습니다: <a href="https://j333333766-hub.github.io/math-korean-vocab-sample/prototype/" target="_blank" rel="noopener">7차시 프로토타입</a></li>
-        <li>왼쪽 단계 목록이나 화면 양옆 화살표로 처음부터 끝까지 넘겨 봅니다.</li>
-        <li>화면 위쪽 단추를 하나씩 눌러 봅니다.</li>
-      </ol>
-      <div class="grid2">
-        <div class="mini"><h3>점검</h3><p>차시 내용이 약속(학습 어휘, 빠진 칸, 글 길이)에 맞는지 알려 줍니다. <b>점검 ✓</b>이면 문제없고, <b>점검 3</b>처럼 숫자가 보이면 눌러서 나온 내용을 Claude에게 알려 주세요.</p></div>
-        <div class="mini"><h3>제작 메모</h3><p>화면마다 업체에 전하는 설명(개발 영역, 음원, 기회)이 보입니다.</p></div>
-        <div class="mini"><h3>🤖 지침 묻기</h3><p>회의록과 지침을 근거로 AI에게 묻는 칸입니다. 처음 한 번 <code>내 설정.txt</code>의 접속 암호를 넣으세요.</p></div>
-        <div class="mini"><h3>💬 검토 의견</h3><p>검토위원이 의견을 남기는 칸입니다. <b>연습 삼아 의견을 남기지 마세요</b>(공유 시트에 그대로 쌓입니다).</p></div>
-      </div>
-      <div class="see"><b>활동 유형 고를 때</b> · 업체가 만들 수 있는 상호작용 유형을 우리 내용으로 직접 해 볼 수 있습니다: <a href="https://j333333766-hub.github.io/math-korean-vocab-sample/prototype/types.html" target="_blank" rel="noopener">인터랙티브 유형 보기</a></div>
-      <button class="chk" type="button" id="c-s6">☐ 다 했어요</button>
-    </article>
+<section class="step gut" id="s6" data-t="샘플 보기"><div class="in">
+  <div class="txt">
+    <span class="num"><b>6</b>샘플</span>
+    <h2>샘플 차시 둘러보기</h2><span class="time">10분</span>
+    <ol class="do">
+      <li><span>탐색기에서 <code>샘플\07_소인수분해(샘플).html</code>을 더블클릭하면 브라우저로 열립니다. <a href="https://j333333766-hub.github.io/math-korean-vocab-sample/prototype/" target="_blank" rel="noopener">인터넷 주소로 보기</a></span></li>
+      <li><span>왼쪽 단계 목록이나 화면 양옆 화살표로 끝까지 넘겨 봅니다.</span></li>
+      <li><span>위쪽 단추 네 개를 눌러 봅니다. 오른쪽에 눌렀을 때의 모습이 있어요.</span></li>
+    </ol>
+    <div class="note warn"><b>💬 검토 의견</b><span>검토위원이 쓰는 칸이에요. <b>연습으로 의견을 남기지 마세요</b>(공유 시트에 그대로 쌓여요).</span></div>
+    <div class="note ok"><b>활동 고르기</b><span>업체가 만들 수 있는 활동을 직접 해 보기: <a href="https://j333333766-hub.github.io/math-korean-vocab-sample/prototype/types.html" target="_blank" rel="noopener">인터랙티브 유형 보기</a></span></div>
+    <button class="done-btn" type="button">다 했어요</button>
+  </div>
+  <div class="figs">
+    <figure><div class="frame"><img src="img/toolbar.jpg" alt="차시 화면 위쪽 단추 줄: 제작 메모, 점검, 기록 지우기, 지침 묻기, 검토 의견"></div><figcaption><span class="tag real">실제 화면</span>위쪽 단추 줄</figcaption></figure>
+    <div class="two">
+      <figure><div class="frame"><img src="img/btn-check.jpg" alt="점검 결과 창"></div><figcaption><span class="tag real">점검</span>약속에 맞는지 확인(✓면 통과)</figcaption></figure>
+      <figure><div class="frame"><img src="img/btn-memo.jpg" alt="제작 메모 칸"></div><figcaption><span class="tag real">제작 메모</span>업체에 전하는 화면 설명</figcaption></figure>
+      <figure><div class="frame"><img src="img/btn-ask.jpg" alt="지침 묻기 칸"></div><figcaption><span class="tag real">지침 묻기</span>암호는 <code>내 설정.txt</code></figcaption></figure>
+      <figure><div class="frame"><img src="img/btn-comment.jpg" alt="검토 의견 칸"></div><figcaption><span class="tag real">검토 의견</span>검토위원용(연습 금지)</figcaption></figure>
+    </div>
+  </div>
+</div></section>
 
-    <article class="step" id="s7" data-title="차시 만들기">
-      <header><span class="num">7</span><div><h2>내 차시 만들기</h2><span class="time">15분</span></div></header>
-      <ol class="do">
-        <li>담당 차시 번호와 이름을 넣어 부탁합니다. 이름을 모르면 번호만 말해도 됩니다.</li>
-      </ol>
-      <div class="say"><q>8차시 만들어 줘.</q><button type="button" data-copy>복사</button></div>
-      <ol class="do" start="2">
-        <li>Claude가 학습 어휘와 구성을 먼저 정리해 보여 주거나 몇 가지를 물을 수 있습니다. 대답하거나 “그대로 진행해 줘”라고 하세요.</li>
-        <li>다 만들면 <code>차시\08_….html</code> 같은 파일이 생깁니다. 탐색기에서 더블클릭해 엽니다.</li>
-        <li>위쪽 <b>점검</b> 단추가 <b>점검 ✓</b>인지 봅니다. 숫자가 있으면 눌러서 나온 글을 복사해 Claude에게 붙여 넣으세요.</li>
-      </ol>
-      <div class="see"><b>이렇게 보이면 성공</b> · 내 차시가 샘플처럼 다섯 단계로 넘어가고, 점검이 ✓입니다. 영상 자리는 컷별 대본으로 나옵니다(영상은 업체가 만듭니다).</div>
-      <button class="chk" type="button" id="c-s7">☐ 다 했어요</button>
-    </article>
+<section class="step gut" id="s7" data-t="차시 만들기"><div class="in">
+  <div class="txt">
+    <span class="num"><b>7</b>만들기</span>
+    <h2>내 차시 만들기</h2><span class="time">15분</span>
+    <ol class="do">
+      <li><span>담당 차시 번호를 넣어 부탁합니다.</span></li>
+    </ol>
+    <div class="ask"><q>8차시 만들어 줘.</q><button type="button" data-copy>복사</button></div>
+    <ol class="do" start="2" style="counter-reset:d 1">
+      <li><span>Claude가 학습 어휘와 구성을 먼저 보여 주거나 몇 가지를 물어요. 대답하거나 “그대로 진행해 줘”라고 하세요.</span></li>
+      <li><span><code>차시\08_….html</code>이 생기면 더블클릭해 엽니다.</span></li>
+      <li><span>위쪽 <b>점검</b>이 <b>점검 ✓</b>인지 봅니다. 숫자가 있으면 눌러 나온 글을 복사해 Claude에게 붙여 넣으세요.</span></li>
+    </ol>
+    <div class="note ok"><b>성공</b><span>샘플처럼 다섯 단계로 넘어가고 점검이 ✓. 영상 자리는 컷별 대본으로 나와요(영상은 업체가 만듭니다).</span></div>
+    <button class="done-btn" type="button">다 했어요</button>
+  </div>
+  <div class="figs">
+    <figure><div class="frame"><img src="img/sample-card-read.jpg" alt="뜻 카드와 2번 따라 읽기 화면"></div><figcaption><span class="tag real">실제 화면</span>만들어진 차시의 한 화면 예(뜻 카드 + 2번 따라 읽기)</figcaption></figure>
+  </div>
+</div></section>
 
-    <article class="step" id="s8" data-title="고치기">
-      <header><span class="num">8</span><div><h2>말로 고치기</h2><span class="time">10분</span></div></header>
-      <p>화면을 보면서 고칠 점을 평소 말투로 부탁합니다. <b>한 번에 하나씩</b>, 화면 왼쪽 위의 번호(예: <code>2-1</code>)로 위치를 짚어 주면 정확합니다. 아래 문장을 눌러 복사해 써 보세요.</p>
-      <div class="say"><q>2-1 생활 속 뜻에 ‘공통’이 쓰이는 생활 장면을 하나 더 넣어 줘.</q><button type="button" data-copy>복사</button></div>
-      <div class="say"><q>뜻 카드 문장을 초등학교 4학년이 알아들을 만큼 쉽게 바꿔 줘.</q><button type="button" data-copy>복사</button></div>
-      <div class="say"><q>연습하기 첫 번째 고르기의 그림을 다른 예로 바꿔 줘.</q><button type="button" data-copy>복사</button></div>
-      <div class="say"><q>점검에 이렇게 나와: (점검 내용 붙여 넣기)</q><button type="button" data-copy>복사</button></div>
-      <div class="say"><q>방금 바꾼 것 되돌려 줘.</q><button type="button" data-copy>복사</button></div>
-      <div class="caution"><b>틀로 안 되는 것</b> · 화면 모양 자체를 바꾸고 싶으면 “틀 수정 요청에 적어 줘”라고 하세요. 대표 교사가 모아서 모두의 틀을 함께 고칩니다.</div>
-      <button class="chk" type="button" id="c-s8">☐ 다 했어요</button>
-    </article>
+<section class="step gut" id="s8" data-t="고치기"><div class="in">
+  <div class="txt">
+    <span class="num"><b>8</b>고치기</span>
+    <h2>말로 고치기</h2><span class="time">10분</span>
+    <p>화면을 보며 평소 말투로 부탁합니다. <b>한 번에 하나씩</b>, 화면 왼쪽 위 번호(예: <code>2-1</code>)로 위치를 짚으면 정확해요.</p>
+    <div class="note warn"><b>틀로 안 되는 것</b><span>화면 모양 자체를 바꾸고 싶으면 “틀 수정 요청에 적어 줘”라고 하세요.</span></div>
+    <button class="done-btn" type="button">다 했어요</button>
+  </div>
+  <div class="figs">
+    <div class="asks">
+      <div class="ask"><q>2-1 생활 속 뜻에 ‘공통’이 쓰이는 생활 장면을 하나 더 넣어 줘.</q><button type="button" data-copy>복사</button></div>
+      <div class="ask"><q>뜻 카드 문장을 초등학교 4학년이 알아들을 만큼 쉽게 바꿔 줘.</q><button type="button" data-copy>복사</button></div>
+      <div class="ask"><q>연습하기 첫 번째 고르기의 그림을 다른 예로 바꿔 줘.</q><button type="button" data-copy>복사</button></div>
+      <div class="ask"><q>점검에 이렇게 나와: (점검 내용 붙여 넣기)</q><button type="button" data-copy>복사</button></div>
+      <div class="ask"><q>왜 이렇게 만들었어? 근거를 알려 줘.</q><button type="button" data-copy>복사</button></div>
+      <div class="ask"><q>방금 바꾼 것 되돌려 줘.</q><button type="button" data-copy>복사</button></div>
+    </div>
+  </div>
+</div></section>
 
-    <article class="step" id="s9" data-title="마치기">
-      <header><span class="num">9</span><div><h2>마치기와 다음 작업</h2><span class="time">5분</span></div></header>
-      <ul class="do">
-        <li>만든 차시는 <code>차시</code> 폴더의 html 파일 하나입니다. <b>지우지 마세요.</b> 제출은 대표 교사가 안내하는 방법으로 이 파일을 보냅니다.</li>
-        <li>대화는 앱 왼쪽 목록에 남습니다. 다음에는 같은 폴더로 <b>새 대화</b>를 열고 이렇게 시작하세요.</li>
-      </ul>
-      <div class="say"><q>폴더 내용을 읽고 작업 내용 파악해 줘. 8차시 이어서 고치자.</q><button type="button" data-copy>복사</button></div>
-      <ul class="do">
-        <li>대화가 아주 길어지면 Claude가 앞 내용을 요약하며 이어 갑니다. 엉뚱해지면 새 대화를 여는 편이 낫습니다.</li>
-      </ul>
-      <button class="chk" type="button" id="c-s9">☐ 다 했어요</button>
-    </article>
+<section class="step gut" id="s9" data-t="마치기"><div class="in">
+  <div class="txt">
+    <span class="num"><b>9</b>마치기</span>
+    <h2>저장과 다음 작업</h2><span class="time">5분</span>
+    <ol class="do">
+      <li><span>만든 차시는 <code>차시</code> 폴더의 html 파일 하나예요. <b>지우지 마세요.</b> 제출은 대표 교사가 안내하는 방법으로.</span></li>
+      <li><span>대화는 앱 왼쪽 목록에 남습니다. 다음에는 같은 폴더로 <b>새 대화</b>를 열고 이렇게 시작하세요.</span></li>
+    </ol>
+    <div class="ask"><q>폴더 내용을 읽고 작업 내용 파악해 줘. 8차시 이어서 고치자.</q><button type="button" data-copy>복사</button></div>
+    <button class="done-btn" type="button">다 했어요</button>
+  </div>
+  <div class="figs">
+    <figure><div class="frame"><div class="bar"><i></i><i></i><i></i><span>문서 › KSL수학어휘_차시개발키트 › 차시</span></div>
+      <div class="exp"><div class="row key"><span class="ico f"></span><b>08_최대공약수.html</b><small>내가 만든 차시</small></div><div class="row"><span class="ico"></span>_예전 틀<small>틀이 바뀌기 전 사본</small></div><div class="row"><span class="ico f"></span>읽어 보세요.txt<small></small></div></div></div>
+      <figcaption><span class="tag draw">그림</span>차시 폴더 — 차시 하나 = html 파일 하나</figcaption></figure>
+  </div>
+</div></section>
 
-    <section class="step" id="faq" data-skip="1">
-      <header><span class="num">?</span><div><h2>막힐 때</h2><span class="time">필요할 때 펼쳐 보세요</span></div></header>
-      <div>
-        <details><summary>Code 메뉴가 보이지 않아요</summary><p>요금제가 Pro인지, 앱이 최신인지 확인하세요. 앱을 완전히 닫았다 다시 열면 보이는 경우가 많습니다.</p></details>
-        <details><summary>허락 창이 너무 자주 떠요</summary><p>키트 폴더 안의 작업이면 묶어서 허락하는 단추(이번 대화 동안 허용 등)를 쓰세요. 키트 밖 폴더를 고치겠다고 하면 허락하지 말고 이유를 물어보세요.</p></details>
-        <details><summary>차시 화면이 하얗고 “차시 내용을 읽지 못했습니다”만 나와요</summary><p>그 글을 그대로 복사해 Claude에게 붙여 넣으세요. 따옴표나 쉼표가 빠진 곳을 찾아 고칩니다.</p></details>
-        <details><summary>“사용 한도에 도달했어요”라고 나와요</summary><p>Pro의 시간당 사용량을 다 쓴 것입니다. 안내된 시간이 지나면 다시 쓸 수 있습니다. 그동안 만든 차시를 브라우저로 넘겨 보며 고칠 점을 적어 두세요.</p></details>
-        <details><summary>Claude가 엉뚱한 차시를 고치거나 원칙과 다르게 만들어요</summary><p>“CLAUDE.md의 원칙을 다시 읽고 지금 차시를 점검해 줘.”라고 하세요. 그래도 이상하면 새 대화를 열고 처음 문장부터 다시 시작합니다.</p></details>
-        <details><summary>실수로 차시 파일을 망가뜨렸어요</summary><p>“방금 고친 것 되돌려 줘.”라고 먼저 부탁하세요. 틀을 바꾸기 전 파일은 <code>차시\_예전 틀\</code>에도 남아 있습니다.</p></details>
-        <details><summary>학교 컴퓨터에서 설치가 안 돼요</summary><p>관리자 권한이 필요한 경우입니다. 개인 노트북을 쓰거나 정보 담당 선생님께 설치를 부탁하세요.</p></details>
-      </div>
-    </section>
+</main>
 
-    <section class="step" id="tips" data-skip="1">
-      <header><span class="num">✓</span><div><h2>잘 부탁하는 요령</h2><span class="time">작업하면서 기억해 두세요</span></div></header>
-      <div class="grid2">
-        <div class="mini"><h3>하나씩 부탁하기</h3><p>여러 가지를 한꺼번에 말하기보다 한 가지씩 고치고 화면을 확인하면 실수가 적습니다.</p></div>
-        <div class="mini"><h3>위치를 번호로</h3><p>화면 번호(<code>3-2</code>)나 단계 이름(교과서 맛보기)으로 말하면 정확히 찾아 고칩니다.</p></div>
-        <div class="mini"><h3>이유 묻기</h3><p>“왜 이렇게 만들었어?”라고 물으면 지침의 근거를 알려 줍니다. 근거가 틀렸다면 바로잡아 주세요.</p></div>
-        <div class="mini"><h3>원칙 다섯 가지</h3><p>문제를 풀게 하지 않기 · 개념 다시 가르치지 않기 · 학습 어휘는 3개까지 · 뜻과 용례는 충남대 자료 · 쓰기·말하기는 연습하기에.</p></div>
-      </div>
-    </section>
+<section class="faq gut" id="faq"><div class="in">
+  <div>
+    <span class="eyebrow">막힐 때</span>
+    <h2 style="font-size:30px;margin-top:8px">자주 막히는 곳</h2>
+    <div class="tips">
+      <div class="tip"><h3>하나씩 부탁하기</h3><p>한 가지씩 고치고 화면을 확인하면 실수가 적어요.</p></div>
+      <div class="tip"><h3>번호로 짚기</h3><p>화면 번호(<code>3-2</code>)나 단계 이름으로 말해요.</p></div>
+      <div class="tip"><h3>이유 묻기</h3><p>“왜 이렇게 했어?”라고 물으면 지침 근거를 알려 줘요.</p></div>
+      <div class="tip"><h3>원칙 다섯</h3><p>문제 풀게 하지 않기 · 개념 다시 가르치지 않기 · 학습 어휘 3개까지 · 충남대 뜻·용례 · 쓰기·말하기는 연습하기에</p></div>
+    </div>
+  </div>
+  <div>
+    <details><summary>Code 메뉴가 보이지 않아요</summary><p>요금제가 Pro인지, 앱이 최신인지 확인하고 앱을 완전히 닫았다 다시 여세요.</p></details>
+    <details><summary>허락 창이 너무 자주 떠요</summary><p>키트 폴더 안의 일이면 묶어서 허락하는 단추를 쓰세요. 키트 밖 폴더를 고치겠다고 하면 허락하지 말고 이유를 물어보세요.</p></details>
+    <details><summary>차시 화면이 하얗고 “차시 내용을 읽지 못했습니다”만 나와요</summary><p>그 글을 그대로 복사해 Claude에게 붙여 넣으세요. 빠진 따옴표나 쉼표를 찾아 고칩니다.</p></details>
+    <details><summary>“사용 한도에 도달했어요”라고 나와요</summary><p>Pro의 사용량을 다 쓴 거예요. 안내된 시간이 지나면 다시 쓸 수 있어요. 그동안 차시를 넘겨 보며 고칠 점을 적어 두세요.</p></details>
+    <details><summary>원칙과 다르게 만들거나 엉뚱한 곳을 고쳐요</summary><p>“CLAUDE.md의 원칙을 다시 읽고 지금 차시를 점검해 줘.”라고 하세요. 그래도 이상하면 새 대화를 열고 처음 문장부터 시작합니다.</p></details>
+    <details><summary>실수로 차시를 망가뜨렸어요</summary><p>“방금 고친 것 되돌려 줘.”라고 먼저 부탁하세요. 틀을 바꾸기 전 파일은 <code>차시\_예전 틀\</code>에도 남아 있어요.</p></details>
+    <details><summary>학교 컴퓨터에서 설치가 안 돼요</summary><p>관리자 권한이 필요한 경우예요. 개인 노트북을 쓰거나 정보 담당 선생님께 부탁하세요.</p></details>
+  </div>
+</div></section>
 
-  </main>
-</div>
+<footer class="gut"><div class="in">
+  <span>링크 모음</span>
+  <a href="https://j333333766-hub.github.io/math-korean-vocab-sample/prototype/" target="_blank" rel="noopener">7차시 프로토타입</a>
+  <a href="https://j333333766-hub.github.io/math-korean-vocab-sample/prototype/types.html" target="_blank" rel="noopener">인터랙티브 유형 보기</a>
+  <a href="https://j333333766-hub.github.io/math-korean-vocab-sample/review/" target="_blank" rel="noopener">검토 요청 페이지</a>
+  <a href="https://github.com/j333333766-hub/ksl-math-vocab-kit" target="_blank" rel="noopener">공통 지침 저장소</a>
+</div></footer>
 
 <script>
-const steps = [...document.querySelectorAll('.step:not([data-skip])')];
-const KEY = 'ksl-training-done';
-let done = {};
-try { done = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { done = {}; }
+const steps = [...document.querySelectorAll('.step')];
+const KEY = 'ksl-training-done-v2';
+let done = {}; try { done = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) {}
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (e) {} };
-const nav = document.getElementById('nav');
-steps.forEach(s => {
-  const a = document.createElement('a'); a.href = '#' + s.id; a.id = 'n-' + s.id;
-  a.innerHTML = `<b>${s.querySelector('.num').textContent}</b><span>${s.dataset.title}</span>`; nav.append(a);
-  const btn = s.querySelector('.chk');
-  btn.addEventListener('click', () => { done[s.id] = !done[s.id]; save(); draw();
-    if (done[s.id]) { const i = steps.indexOf(s); if (steps[i + 1]) steps[i + 1].scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); } });
+const mini = document.getElementById('mini');
+steps.forEach((s, i) => {
+  const a = document.createElement('a'); a.href = '#' + s.id; a.textContent = i; a.title = s.dataset.t; mini.append(a);
+  s.querySelector('.done-btn').addEventListener('click', () => { done[s.id] = !done[s.id]; save(); draw(); if (done[s.id] && steps[i + 1]) steps[i + 1].scrollIntoView({ block: 'start' }); });
 });
 function draw() {
   let n = 0;
-  steps.forEach(s => { const on = !!done[s.id]; if (on) n++; const b = s.querySelector('.chk'); b.classList.toggle('on', on); b.textContent = on ? '☑ 다 했어요' : '☐ 다 했어요'; document.getElementById('n-' + s.id).classList.toggle('done', on); });
-  document.getElementById('prog').textContent = `${n} / ${steps.length} 단계 완료`;
-  document.getElementById('bar').style.width = (n / steps.length * 100) + '%';
+  steps.forEach((s, i) => { const on = !!done[s.id]; if (on) n++; const b = s.querySelector('.done-btn'); b.classList.toggle('on', on); b.textContent = on ? '✓ 다 했어요' : '다 했어요'; mini.children[i].classList.toggle('done', on); });
+  document.getElementById('prog').textContent = n + ' / ' + steps.length;
 }
 draw();
 document.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', () => {
-  const t = b.parentElement.querySelector('q').textContent;
+  const q = b.parentElement.querySelector('q'), t = q.textContent;
   const ok = () => { b.textContent = '복사됨'; b.classList.add('ok'); setTimeout(() => { b.textContent = '복사'; b.classList.remove('ok'); }, 1500); };
-  const fallback = () => { const r = document.createRange(); r.selectNodeContents(b.parentElement.querySelector('q')); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); b.textContent = 'Ctrl+C'; };
-  try { navigator.clipboard.writeText(t).then(ok, fallback); } catch (e) { fallback(); }
+  const fb = () => { const r = document.createRange(); r.selectNodeContents(q); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Ctrl+C'; };
+  try { navigator.clipboard.writeText(t).then(ok, fb); } catch (e) { fb(); }
 }));
+// 그림 크게 보기
+const lb = document.createElement('div'); lb.className = 'lb'; lb.hidden = true; lb.innerHTML = '<img alt="">'; document.body.append(lb);
+document.querySelectorAll('.frame img').forEach(i => i.addEventListener('click', () => { lb.querySelector('img').src = i.src; lb.querySelector('img').alt = i.alt; lb.hidden = false; }));
+lb.addEventListener('click', () => { lb.hidden = true; });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') lb.hidden = true; });
 </script>
-
 </body>
 </html>
