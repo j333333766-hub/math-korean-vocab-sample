@@ -1765,10 +1765,12 @@ button:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
     }
     wait(ms) {
       if (this.dead) return Promise.reject(CANCEL);
-      if (SHOT) return Promise.resolve();
+      if (SHOT || this.fast) return Promise.resolve();
       return new Promise((res, rej) => {
-        const t = setTimeout(() => { this.timers.delete(t); this.pending.delete(rej); res(); }, ms);
-        this.timers.add(t); this.pending.add(rej);
+        const wakes = this.wakes || (this.wakes = new Set());
+        const done = () => { clearTimeout(t); this.timers.delete(t); this.pending.delete(rej); wakes.delete(done); res(); };
+        const t = setTimeout(done, ms);
+        this.timers.add(t); this.pending.add(rej); wakes.add(done);   // 컷을 건너뛰면 기다리던 것을 바로 깨운다
       });
     }
     later(ms, fn) {
@@ -1779,6 +1781,7 @@ button:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
     play(id, o = {}) {
       if (this.dead) return Promise.reject(CANCEL);
       stopNar();
+      if (this.fast) return Promise.resolve();   // 컷을 건너뛸 때 남은 대사는 넘긴다
       const svg = chrSvg(o.chr);
       const capShown = showCap(id, o);
       if (SHOT) return Promise.resolve();
@@ -1937,7 +1940,7 @@ button:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
     const ctx = makeCtx(i, run); cur.ctx = ctx;
     if (P.instr) setInstr(P.instr[0], P.instr[1]); else elInstr.hidden = true;
     P.build(ctx);
-    updateChrome();
+    updateChrome(); cutUI(ctx);
     if (started && !opt.noPlay) startPage(ctx);
     return ctx;
   }
@@ -1946,7 +1949,10 @@ button:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
     (async () => {
       const heard = P.instr ? await ctx.say([P.instr[1]], null) : true;
       if (P.intro && heard) await P.intro(ctx);
-      if (P.steps) { for (const st of P.steps) await st(ctx); ctx.finish(); }
+      if (P.steps) {
+        for (let k = 0; k < P.steps.length; k++) { ctx.run.fast = false; ctx.stepNo = k; cutUI(ctx); await P.steps[k](ctx); }
+        ctx.run.fast = false; ctx.stepNo = P.steps.length; cutUI(ctx); ctx.finish();
+      }
     })().catch(e => { if (e !== CANCEL) console.error(e); });
   }
   function begin() {
@@ -2140,6 +2146,48 @@ button:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
   }
   function foldStep(d, n) { $$('.row', d).forEach((r, k) => r.classList.toggle('on', k <= n)); }
   function powStep(d, n) { for (let k = 1; k <= 3; k++) d.classList.toggle('g' + k, k <= n); d.classList.toggle('pa', n >= 1); }
+
+  /* ---------------------------------------------------------------- 컷 넘기기(10/28 사용자 의견)
+     장면 쪽(anim)은 대사가 컷마다 이어진다. 오른쪽 아래 ‘다음 말’ 단추나 장면을 누르면 지금 컷을 건너뛰고 다음 컷으로 간다.
+     오른쪽 화살표는 다음 장면(쪽)으로 가므로 화살표 아래에 ‘다음 장면’ 글자를 붙여 구별한다. */
+  const CUTCSS = `
+  .bubble:not(.on):not(.dim){transition:none}   /* 같은 자리의 말풍선이 바뀔 때 앞 말풍선이 바로 사라져 글자가 겹치지 않는다 */
+  .cutnext{position:absolute;right:26px;bottom:24px;z-index:30;display:flex;align-items:center;gap:10px;font:inherit;font-size:24px;font-weight:900;color:var(--navy);
+    background:#fff6dc;border:3px solid var(--navy);border-radius:999px;padding:8px 22px 8px 16px;cursor:pointer;box-shadow:0 4px 0 rgba(24,54,74,.3);animation:cutcue 1.6s ease-in-out infinite}
+  .cutnext[hidden]{display:none}
+  .cutnext .tri{width:0;height:0;border-left:16px solid var(--orange);border-top:10px solid transparent;border-bottom:10px solid transparent}
+  .cutnext small{font-size:17px;font-weight:800;color:#5d6f7d}
+  .cutnext:hover{background:#ffe8a6}
+  @keyframes cutcue{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+  .scene.cuttable{cursor:pointer}
+  .nav .navlab{position:absolute;left:50%;top:80px;transform:translateX(-50%);white-space:nowrap;font-size:14px;font-weight:900;color:var(--navy);background:rgba(255,255,255,.9);border:2px solid var(--navy);border-radius:999px;padding:1px 8px}
+  .nav.locked .navlab{opacity:.6}
+  `;
+  style.textContent += CUTCSS;
+  btnNext.insertAdjacentHTML('beforeend', '<span class="navlab">다음 장면</span>');
+  btnPrev.insertAdjacentHTML('beforeend', '<span class="navlab">이전 장면</span>');
+  const btnCut = document.createElement('button');
+  btnCut.type = 'button'; btnCut.className = 'cutnext'; btnCut.hidden = true;
+  btnCut.setAttribute('aria-label', '다음 말 보기');
+  stage.appendChild(btnCut);
+  /* 지금 컷 번호에 맞춰 ‘다음 말’ 단추를 보이거나 감춘다 */
+  function cutUI(ctx) {
+    const P = ctx && ctx.P, n = P && P.steps ? P.steps.length : 0, k = ctx ? ctx.stepNo : undefined;
+    const v = !!(P && P.kind === 'anim' && started && n > 1 && k !== undefined && k < n - 1 && !SHOT);
+    btnCut.hidden = !v; scene.classList.toggle('cuttable', v);
+    if (v) btnCut.innerHTML = `<span class="tri"></span><span>다음 말</span><small>${k + 1} / ${n}</small>`;
+  }
+  /* 지금 컷을 바로 끝낸다: 소리를 멈추고, 남은 기다림과 대사는 건너뛴다 */
+  function skipCut() {
+    const ctx = cur.ctx; if (!ctx || btnCut.hidden) return;
+    ctx.run.fast = true; stopNar(); [...(ctx.run.wakes || [])].forEach(f => f()); sfx('pop');
+  }
+  btnCut.onclick = e => { e.stopPropagation(); skipCut(); };
+  scene.addEventListener('click', e => {
+    if (btnCut.hidden || !elPop.hidden) return;
+    if (e.target.closest && e.target.closest('button,a,input,textarea,.kwb,.cb,.tile,canvas')) return;
+    skipCut();
+  });
 
   /* ---------------------------------------------------------------- recording (녹음) */
   function recorder(ctx, opt = {}) {
