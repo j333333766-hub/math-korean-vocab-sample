@@ -3378,25 +3378,25 @@ button:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
       const lq = lisBtn('선생님 질문 듣기'); c.bQ.prepend(lq);
       c.bOk = put(c.sc, 'bubble', `좋아요. ${T('소인수분해')}와<br>${T('거듭제곱')}을 잘 기억해요.`, 'left:600px;top:150px;width:540px;--tx:427px');
       /* 학생 말풍선: 두 핵심어 자리는 점선으로 가려 스스로 떠올린다(v6-1, 김수철 안) */
-      c.bMe = put(c.sc, 'bubble say-me on', `<span class="me">나</span>나는 오늘 <span class="mask" aria-label="빈칸"><span class="mw">${T('소인수분해')}</span></span>와 <span class="mask" aria-label="빈칸"><span class="mw">${T('거듭제곱')}</span></span>을 배웠어요.`, 'left:60px;top:446px;width:840px;--tx:300px');
+      c.bMe = put(c.sc, 'bubble say-me on', `<span class="me">나</span>저는 오늘 <span class="mask" aria-label="빈칸"><span class="mw">${T('소인수분해')}</span></span><span class="jo">와/과</span> <span class="mask" aria-label="빈칸"><span class="mw">${T('거듭제곱')}</span></span>을 배웠어요.`, 'left:60px;top:446px;width:840px;--tx:300px');
       const masks = $$('.mask', c.bMe);
       masks.forEach(x => { x.style.width = '150px'; });
       const row = put(c.sc, 'ctrl-row', '', 'left:150px;width:700px;top:552px;justify-content:flex-start');
       const status = put(c.sc, 'rec-status hide', CK.replace('class="ck"', 'class="ck on"') + '<span>녹음했어요</span>', 'left:150px;width:340px;top:642px;justify-content:flex-start');
       const bSkip = put(c.sc, 'btn ghost', '건너뛰기', 'position:absolute;left:520px;top:632px', 'button');
       const m = c.mem;
-      const reveal = () => { masks.forEach(x => { x.classList.add('open'); x.style.width = ''; x.setAttribute('aria-label', x.textContent); }); on(c.bQ, false); on(c.bOk); bSkip.hidden = true; };
+      const reveal = () => { masks.forEach(x => { x.classList.add('open'); x.style.width = ''; x.setAttribute('aria-label', x.textContent); }); $$('.jo', c.bMe).forEach(x => { x.textContent = '와'; }); on(c.bQ, false); on(c.bOk); bSkip.hidden = true; };
       const closing = safe(async skipped => {
         if (m.closing) return; m.closing = true; m.skipped = !!skipped;
         bSkip.hidden = true;
         await c.wait(400);
-        masks.forEach(x => { x.classList.add('open'); x.style.width = ''; x.setAttribute('aria-label', x.textContent); }); sfx('pop');
+        masks.forEach(x => { x.classList.add('open'); x.style.width = ''; x.setAttribute('aria-label', x.textContent); }); $$('.jo', c.bMe).forEach(x => { x.textContent = '와'; }); sfx('pop');
         await c.wait(700);
         on(c.bQ, false); on(c.bOk);
         await c.play('t_ok4', { chr: c.teacher }); await c.wait(300);
         m.closed = true; c.done();
       });
-      const rec = recorder(c, { key: 'rec4', label: '나는 오늘 소인수분해와 거듭제곱을 배웠어요.', onDone: () => { m.rec = true; show(status); c.award('rec4.say', 'say'); closing(false); } });
+      const rec = recorder(c, { key: 'rec4', label: '저는 오늘 소인수분해와 거듭제곱을 배웠어요.', onDone: () => { m.rec = true; show(status); c.award('rec4.say', 'say'); closing(false); } });
       row.appendChild(rec.el);
       bSkip.onclick = () => { if (activeRec) activeRec.cancel(); closing(true); };
       if (m.rec) { rec.restoreDone(); show(status); }
